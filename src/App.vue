@@ -2,20 +2,23 @@
   <!-- <img alt="Vue logo" src="./assets/logo.png" /> -->
   <!-- <Counter></Counter> -->
   <!-- <FormData></FormData> -->
-  <Home></Home>
+  <!-- <Home></Home> -->
+  <Login></Login>
 </template>
 
 <script>
 // import Counter from "./components/Counter.vue";
 // import FormData from "./components/FomeDate.vue";
-import Home from "./view/Home.vue";
+// import Home from "./view/Home.vue";
+import Login from "./view/Login.vue";
 
 export default {
   name: "App",
   components: {
     // Counter,
     // FormData,
-    Home,
+    // Home,
+    Login,
   },
 };
 </script>
