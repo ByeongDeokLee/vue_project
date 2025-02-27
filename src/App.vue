@@ -4,6 +4,7 @@
   <!-- <FormData></FormData> -->
   <!-- <Home></Home> -->
   <Login></Login>
+  <Board></Board>
 </template>
 
 <script>
@@ -11,6 +12,7 @@
 // import FormData from "./components/FomeDate.vue";
 // import Home from "./view/Home.vue";
 import Login from "./view/Login.vue";
+import Board from "./view/Board.vue";
 
 export default {
   name: "App",
@@ -19,6 +21,7 @@ export default {
     // FormData,
     // Home,
     Login,
+    Board,
   },
 };
 </script>

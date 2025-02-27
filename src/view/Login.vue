@@ -1,18 +1,10 @@
 <template>
   <div class="container">
-    <h2 v-if="!isLoggedIn">사용자 입력</h2>
+    <h2>로그인</h2>
 
     <!-- 로그인 폼 -->
     <transition name="false">
       <form v-if="!isLoggedIn" @submit.prevent="handleLogin">
-        <input
-          v-model="formDate.name"
-          placeholder="이름"
-          required
-          @input="validateForm"
-        />
-        <!-- <p v-if="ErrorCodes.name" class="error">{{ errors.name }}</p> -->
-
         <input
           v-model="formDate.email"
           type="email"
@@ -20,27 +12,24 @@
           required
           @input="validateForm"
         />
-        <!-- <p v-if="errors.email" class="error">{{ errors.email }}</p> -->
-        <button type="submit" :disabled="!isValid">로그인</button>
+        <p v-if="errors.email" class="error">{{ errors.email }}</p>
+        <input
+          v-model="formDate.name"
+          placeholder="비밀번호"
+          required
+          @input="validateForm"
+        />
+        <p v-if="errors.name" class="error">{{ errors.name }}</p>
+
+        <button type="submit">로그인</button>
       </form>
     </transition>
-
-    <!-- 게시판 -->
-    <div v-if="isLoggedIn" class="board">
-      <h2>게시판</h2>
-      <textarea v-model="newPost" placeholder="게시글을 작성하세요"></textarea>
-      <button @click="addPost" :disabled="!newPost">작성</button>
-
-      <ul>
-        <li v-for="(post, index) in posts" :key="index">{{ post }}</li>
-      </ul>
-      <button @click="logout" class="logout">로그아웃</button>
-    </div>
+    <button v-if="!isLoggedIn" @click="logout" class="logout">로그아웃</button>
   </div>
 </template>
 
 <script>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 export default {
   name: "LoginPage",
   setup() {
@@ -48,8 +37,6 @@ export default {
     const errors = ref({ name: "", email: "" });
     const isLoggedIn = ref(false);
     const isValid = ref(false);
-    const newPost = ref("");
-    const posts = ref([]);
 
     //유효성 검사
     const validateForm = () => {
@@ -72,14 +59,6 @@ export default {
       isLoggedIn.value = true;
     };
 
-    //게시물 추가
-    const addPost = () => {
-      if (newPost.value) {
-        posts.value.push(newPost.value);
-        newPost.value = "";
-      }
-    };
-
     //로그아웃
     const logout = () => {
       localStorage.removeItem("name");
@@ -88,16 +67,24 @@ export default {
       formDate.value.name = "";
       formDate.value.email = "";
     };
+
+    //자동 로그인 확인
+    onMounted(() => {
+      // const storedName = localStorage.getItem("name");
+      // const storedEmail = localStorage.getItem("email");
+      // if (!storedName && !storedEmail) {
+      //   formDate.value.name = storedName;
+      //   formDate.value.email = storedEmail;
+      //   isLoggedIn.value = true;
+      // }
+    });
     return {
       formDate,
       errors,
       isLoggedIn,
       isValid,
-      newPost,
-      posts,
       validateForm,
       handleLogin,
-      addPost,
       logout,
     };
   },
@@ -106,9 +93,11 @@ export default {
 
 <style>
 .container {
-  max-width: 400px;
-  margin: auto;
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin-bottom: 20px;
   text-align: center;
+  width: 200px;
 }
 
 .error {
@@ -121,19 +110,9 @@ button:disabled {
   cursor: not-allowed;
 }
 
-textarea {
-  width: 100%;
-  height: 80px;
-  margin-bottom: 10px;
-}
-
-.board {
-  margin-top: 20px;
-}
-
-.logout {
+/* .logout {
   margin-top: 20px;
   background-color: red;
   color: white;
-}
+} */
 </style>
