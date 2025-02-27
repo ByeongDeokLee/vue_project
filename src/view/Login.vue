@@ -32,7 +32,7 @@
       <button @click="addPost" :disabled="!newPost">작성</button>
 
       <ul>
-        <li v-for="(post, index) in posts" :key="index"></li>
+        <li v-for="(post, index) in posts" :key="index">{{ post }}</li>
       </ul>
       <button @click="logout" class="logout">로그아웃</button>
     </div>
@@ -48,8 +48,58 @@ export default {
     const errors = ref({ name: "", email: "" });
     const isLoggedIn = ref(false);
     const isValid = ref(false);
+    const newPost = ref("");
+    const posts = ref([]);
 
-    return { formDate, errors, isLoggedIn, isValid };
+    //유효성 검사
+    const validateForm = () => {
+      errors.value.name =
+        formDate.value.name.length >= 3 ? "" : "정확한 이름을 넣어주세요";
+      errors.value.email = /\S+@\S+\.\S+/.test(formDate.value.email)
+        ? ""
+        : "올바른 이메일 형식을 입력하세요.";
+
+      isValid.value = !errors.value.email && !errors.value.name;
+      // isValid.value = true;
+    };
+
+    //로그인 처리
+    const handleLogin = () => {
+      if (!isValid.value) return;
+
+      localStorage.setItem("name", formDate.value.name);
+      localStorage.setItem("email", formDate.value.email);
+      isLoggedIn.value = true;
+    };
+
+    //게시물 추가
+    const addPost = () => {
+      if (newPost.value) {
+        posts.value.push(newPost.value);
+        newPost.value = "";
+      }
+    };
+
+    //로그아웃
+    const logout = () => {
+      localStorage.removeItem("name");
+      localStorage.removeItem("email");
+      isLoggedIn.value = false;
+      formDate.value.name = "";
+      formDate.value.email = "";
+    };
+    return {
+      formDate,
+      errors,
+      isLoggedIn,
+      isValid,
+      newPost,
+      posts,
+      validateForm,
+      handleLogin,
+      addPost,
+      logout,
+    };
   },
 };
 </script>
