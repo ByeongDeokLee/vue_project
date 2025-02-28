@@ -1,10 +1,11 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Home from "../view/Home.vue";
-import UserDetail from "../view/UserDetail.vue";
+import Login from "../view/Login.vue";
+import Board from "../view/Board.vue";
 
 const routes = [
-  { path: "/", component: Home },
-  { path: "/user/:name/:email", component: UserDetail },
+  { path: "/", redirect: "/login" },
+  { path: "/login", component: Login },
+  { path: "/board", component: Board, meta: { requiresAuth: true } },
 ];
 
 const router = createRouter({

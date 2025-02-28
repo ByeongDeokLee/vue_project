@@ -1,27 +1,21 @@
 <template>
-  <!-- <img alt="Vue logo" src="./assets/logo.png" /> -->
-  <!-- <Counter></Counter> -->
-  <!-- <FormData></FormData> -->
-  <!-- <Home></Home> -->
-  <Login></Login>
-  <Board></Board>
+  <div>
+    <router-view />
+  </div>
 </template>
 
 <script>
-// import Counter from "./components/Counter.vue";
-// import FormData from "./components/FomeDate.vue";
-// import Home from "./view/Home.vue";
-import Login from "./view/Login.vue";
-import Board from "./view/Board.vue";
-
+// import { ref } from "vue";
 export default {
   name: "App",
-  components: {
-    // Counter,
-    // FormData,
-    // Home,
-    Login,
-    Board,
+  components: {},
+  setup() {
+    // const user = ref(null);
+    // const loginRef = ref(null);
+    // const handleLogin = (userInfo) => {
+    //   user.value = userInfo;
+    // };
+    // return { user, loginRef, handleLogin };
   },
 };
 </script>
