@@ -3,45 +3,96 @@
   <div class="board-container">
     <h2>게시판</h2>
     <form @submit.prevent="addPost" class="post-form">
-      <input type="text" placeholder="제목" required />
-      <textarea v-model="newPost" placeholder="게시글을 작성하세요"></textarea>
+      <input v-model="newTitle" type="text" placeholder="제목" required />
+      <textarea
+        v-model="newContent"
+        placeholder="게시글을 작성하세요"
+      ></textarea>
       <button type="submit">작성</button>
     </form>
 
-    <transition-group name="fade" tag="div" class="board-list">
-      <div v-for="post in posts" :key="post.id" class="board-item">
-        <h3>{{ post.title }}</h3>
-        <p>{{ post.content }}</p>
-      </div>
-    </transition-group>
+    <div class="board-container-test">
+      <transition-group name="fade" tag="div" class="board-list">
+        <div
+          v-for="post in posts"
+          :key="post.id"
+          class="board-item"
+          @click="boardIndexPage(post)"
+        >
+          <h3>{{ post.title }}</h3>
+          <p>{{ post.content }}</p>
+        </div>
+      </transition-group>
+    </div>
   </div>
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, onMounted, watch } from "vue";
+import { useRouter } from "vue-router";
+
 export default {
   name: "BoardPage",
   props: ["user"],
-  setup(props) {
-    const newPost = ref("");
-    const posts = ref([
-      { id: 1, title: "첫 번째 게시글", content: "내용 1" },
-      { id: 2, title: "두 번째 게시글", content: "내용 2" },
-    ]);
+  setup(props, { emit }) {
+    const newTitle = ref("");
+    const newContent = ref("");
+    const posts = ref([]);
+    const router = useRouter();
 
-    //게시물 추가
+    // 게시물 추가
     const addPost = () => {
       if (!props.user) {
-        alert("로그인시 이용가능합니다");
+        alert("로그인 후 이용 가능합니다.");
         return;
       }
 
-      if (newPost.value) {
-        posts.value.push(newPost.value);
-        newPost.value = "";
+      if (!newTitle.value.trim() || !newContent.value.trim()) {
+        alert("제목과 내용을 입력하세요.");
+        return;
       }
+
+      // 새로운 게시글 객체 생성
+      const newPost = {
+        id: posts.value.length + 1, // 고유 ID 부여
+        title: newTitle.value,
+        content: newContent.value,
+      };
+
+      posts.value.push(newPost);
+
+      // 입력 필드 초기화
+      newTitle.value = "";
+      newContent.value = "";
     };
-    return { addPost };
+
+    const boardIndexPage = (post) => {
+      emit("login", post);
+      router.push(`/board/${post.id}`); // ✅ DetailPage로 이동
+    };
+
+    watch(posts, (newPosts) => {
+      console.log("게시물 리스트 변경 감지:", newPosts);
+    });
+
+    // 초기 게시물 로딩
+    onMounted(() => {
+      posts.value = [
+        {
+          id: 1,
+          title: "첫 번째 게시글",
+          content: "이것은 첫 번째 게시글입니다.",
+        },
+        {
+          id: 2,
+          title: "두 번째 게시글",
+          content: "이것은 두 번째 게시글입니다.",
+        },
+      ];
+      console.log("초기 게시물 로드됨:", posts.value);
+    });
+
+    return { newTitle, newContent, posts, addPost, boardIndexPage };
   },
 };
 </script>
@@ -54,6 +105,11 @@ export default {
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+.board-container-test {
+  padding: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 h2 {

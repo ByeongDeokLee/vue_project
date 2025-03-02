@@ -52,8 +52,8 @@ export default {
       errors.value.email = /\S+@\S+\.\S+/.test(formDate.value.email)
         ? ""
         : "올바른 이메일 형식을 입력하세요.";
-      errors.value.pwd =
-        formDate.value.pwd.length >= 5 ? "" : "정확한 비밀번호를 입력하세요";
+      // errors.value.pwd =
+      //   formDate.value.pwd.length >= 5 ? "" : "정확한 비밀번호를 입력하세요";
 
       isValid.value = !errors.value.email && !errors.value.pwd;
     };
@@ -67,7 +67,7 @@ export default {
       if (email == formDate.value.email && pwd == formDate.value.pwd) {
         isLoggedIn.value = true;
         emit("login", formDate.value);
-        router.push("/board");
+        router.push({ path: "/board" });
       } else {
         alert("로그인 정보가 일치하지 않습니다.");
         formDate.value.email = "";
@@ -86,8 +86,8 @@ export default {
 
     //자동 로그인 확인
     onMounted(() => {
-      localStorage.setItem("email", "dlqudejr89@naver.com");
-      localStorage.setItem("pwd", "ko20113107@A");
+      localStorage.setItem("email", "1@n.com");
+      localStorage.setItem("pwd", "1");
     });
     return {
       formDate,

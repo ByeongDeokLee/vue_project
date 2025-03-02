@@ -1,21 +1,22 @@
 <template>
   <div>
-    <router-view />
+    <router-view :user="user" @login="handleLogin" />
   </div>
 </template>
 
 <script>
-// import { ref } from "vue";
+import { ref } from "vue";
 export default {
   name: "App",
   components: {},
   setup() {
-    // const user = ref(null);
-    // const loginRef = ref(null);
-    // const handleLogin = (userInfo) => {
-    //   user.value = userInfo;
-    // };
-    // return { user, loginRef, handleLogin };
+    const user = ref(null);
+
+    const handleLogin = (userData) => {
+      console.log("App.vue에서 받은 유저 데이터:", userData);
+      user.value = userData;
+    };
+    return { user, handleLogin };
   },
 };
 </script>
