@@ -34,3 +34,6 @@ setUp함수
 - Composition API에서 컴포넌트의 로직을 정의하는 함수
 - 메서드 정의할때 setup함수에서는 내부에 함수 선언가능
 - 모든 로직이 setup() 안에 모임(data, methods, computed 등)
+
+pinia 설치 (posts 데이터 관리 가능한 라이브러리)
+npm install pinia

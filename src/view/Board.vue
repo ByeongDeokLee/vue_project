@@ -1,5 +1,4 @@
 <template>
-  <!-- 게시판 -->
   <div class="board-container">
     <h2>게시판</h2>
     <form @submit.prevent="addPost" class="post-form">
@@ -12,6 +11,8 @@
     </form>
 
     <div class="board-container-test">
+      <button @click="deleteCheckedPosts" class="delete-btn">선택 삭제</button>
+
       <transition-group name="fade" tag="div" class="board-list">
         <div
           v-for="post in posts"
@@ -21,6 +22,7 @@
         >
           <h3>{{ post.title }}</h3>
           <p>{{ post.content }}</p>
+          <input type="checkbox" v-model="post.checked" @click.stop />
         </div>
       </transition-group>
     </div>
@@ -28,7 +30,8 @@
 </template>
 
 <script>
-import { ref, onMounted, watch } from "vue";
+import { usePostStore } from "@/js/postStore";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 
 export default {
@@ -37,8 +40,10 @@ export default {
   setup(props, { emit }) {
     const newTitle = ref("");
     const newContent = ref("");
-    const posts = ref([]);
     const router = useRouter();
+    const posts = ref([]);
+
+    const store = usePostStore();
 
     // 게시물 추가
     const addPost = () => {
@@ -46,53 +51,51 @@ export default {
         alert("로그인 후 이용 가능합니다.");
         return;
       }
-
       if (!newTitle.value.trim() || !newContent.value.trim()) {
         alert("제목과 내용을 입력하세요.");
         return;
       }
 
-      // 새로운 게시글 객체 생성
       const newPost = {
-        id: posts.value.length + 1, // 고유 ID 부여
+        id: posts.value.length + 1,
         title: newTitle.value,
         content: newContent.value,
+        checked: false, // 체크 여부 추가
       };
 
       posts.value.push(newPost);
 
-      // 입력 필드 초기화
       newTitle.value = "";
       newContent.value = "";
     };
 
-    const boardIndexPage = (post) => {
-      emit("login", post);
-      router.push(`/board/${post.id}`); // ✅ DetailPage로 이동
+    // 선택된 게시물 삭제
+    const deleteCheckedPosts = () => {
+      posts.value = posts.value.filter((post) => !post.checked);
     };
 
-    watch(posts, (newPosts) => {
-      console.log("게시물 리스트 변경 감지:", newPosts);
-    });
+    // 상세페이지 이동
+    const boardIndexPage = (post) => {
+      console.log("데이터 확인", posts);
+      emit("login", post);
+      router.push(`/board/${post.id}`);
+    };
 
     // 초기 게시물 로딩
     onMounted(() => {
-      posts.value = [
-        {
-          id: 1,
-          title: "첫 번째 게시글",
-          content: "이것은 첫 번째 게시글입니다.",
-        },
-        {
-          id: 2,
-          title: "두 번째 게시글",
-          content: "이것은 두 번째 게시글입니다.",
-        },
-      ];
+      console.log("게시물", store.posts);
+      posts.value = store.posts;
       console.log("초기 게시물 로드됨:", posts.value);
     });
 
-    return { newTitle, newContent, posts, addPost, boardIndexPage };
+    return {
+      newTitle,
+      newContent,
+      posts,
+      addPost,
+      boardIndexPage,
+      deleteCheckedPosts,
+    };
   },
 };
 </script>

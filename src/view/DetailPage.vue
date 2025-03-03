@@ -11,7 +11,8 @@
       </div>
 
       <div class="detail-footer">
-        <router-link to="/board" class="back-button">🔙 뒤로 가기</router-link>
+        <button @click="BackBut" class="back-button">뒤로 가기</button>
+        <button @click="EditBut(post)" class="edit-button">수정 하기</button>
       </div>
     </div>
   </div>
@@ -19,24 +20,33 @@
 
 <script>
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 
 export default {
   name: "DetailPage",
   props: ["user"],
-  setup(props) {
+  setup(props, { emit }) {
     const post = ref(null);
+    const router = useRouter();
+
+    const BackBut = () => {
+      router.push(`/board`);
+    };
+
+    const EditBut = () => {
+      emit("borad", post.value);
+      router.push(`/board/${post.value.id}/editPage`);
+    };
 
     onMounted(() => {
-      if (history.state.post) {
-        post.value = history.state.post;
-      } else if (props.user) {
+      if (props.user) {
         post.value = props.user;
       } else {
         post.value = { title: "제목 없음", content: "내용이 없습니다." };
       }
     });
 
-    return { post };
+    return { post, BackBut, EditBut };
   },
 };
 </script>
@@ -92,6 +102,18 @@ export default {
 }
 
 .back-button {
+  display: inline-block;
+  padding: 10px 16px;
+  background-color: #3498db;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.3s;
+}
+
+.edit-button {
   display: inline-block;
   padding: 10px 16px;
   background-color: #3498db;
