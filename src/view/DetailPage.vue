@@ -8,6 +8,60 @@
       <div class="detail-content">
         <h3>{{ post?.title || "제목 없음" }}</h3>
         <p>{{ post?.content || "내용이 없습니다." }}</p>
+
+        <!-- 댓글 입력 영역 -->
+        <form @submit.prevent="writeBut" class="comment-form">
+          <input
+            v-model="newContext"
+            type="text"
+            placeholder="댓글을 입력하세요"
+            required
+            class="comment-input"
+          />
+          <button type="submit" class="comment-button">작성</button>
+        </form>
+
+        <!-- 댓글 리스트 -->
+        <div v-for="(comment, index) in comments" :key="index" class="comment">
+          <template v-if="!reModify[index]">
+            <span class="comment-text">{{ comment.comment }}</span>
+            <button @click="toggleModify(index)" class="edit-button">
+              수정
+            </button>
+          </template>
+
+          <!-- 댓글 수정 UI -->
+          <template v-else>
+            <input v-model="editContext[index]" class="edit-input" />
+            <button @click="saveEdit(index)" class="save-button">저장</button>
+            <button @click="cancelEdit(index)" class="cancel-button">
+              취소
+            </button>
+          </template>
+
+          <button @click="toggleReply(index)" class="reply-button">답글</button>
+
+          <!-- 대댓글 입력 영역 -->
+          <div v-if="CommentsYn[index]" class="reply-form">
+            <input
+              v-model="reContext[index]"
+              type="text"
+              placeholder="답글 입력"
+              class="reply-input"
+              required
+            />
+            <button @click="reWritBut(index)" class="reply-submit">등록</button>
+          </div>
+
+          <!-- 대댓글 리스트 -->
+          <div
+            v-for="(reComment, reIndex) in reComments[index] || []"
+            :key="reIndex"
+            class="reply"
+          >
+            {{ reComment.comment }}
+          </div>
+        </div>
       </div>
 
       <div class="detail-footer">
@@ -28,31 +82,105 @@ export default {
   setup(props, { emit }) {
     const post = ref(null);
     const router = useRouter();
+    const comments = ref([]);
+    const newContext = ref("");
+    const reComments = ref({});
+    const reContext = ref({});
+    const CommentsYn = ref({});
+    const reModify = ref({});
+    const editContext = ref({});
 
+    // 뒤로가기 버튼
     const BackBut = () => {
       router.push(`/board`);
     };
 
+    // 수정하기 버튼
     const EditBut = () => {
       emit("borad", post.value);
       router.push(`/board/${post.value.id}/editPage`);
     };
 
-    onMounted(() => {
-      if (props.user) {
-        post.value = props.user;
-      } else {
-        post.value = { title: "제목 없음", content: "내용이 없습니다." };
+    // 댓글 작성 버튼
+    const writeBut = () => {
+      if (!newContext.value) {
+        alert("댓글을 입력하세요.");
+        return;
       }
+      comments.value.push({ comment: newContext.value });
+      newContext.value = "";
+    };
+
+    // 댓글 수정 모드 토글
+    const toggleModify = (index) => {
+      reModify.value[index] = true;
+      editContext.value[index] = comments.value[index].comment;
+    };
+
+    // 수정 저장
+    const saveEdit = (index) => {
+      if (!editContext.value[index]) {
+        alert("내용을 입력하세요!");
+        return;
+      }
+      comments.value[index].comment = editContext.value[index];
+      reModify.value[index] = false;
+    };
+
+    // 수정 취소
+    const cancelEdit = (index) => {
+      reModify.value[index] = false;
+    };
+
+    // 대댓글 토글
+    const toggleReply = (index) => {
+      CommentsYn.value[index] = !CommentsYn.value[index];
+    };
+
+    // 대댓글 작성
+    const reWritBut = (index) => {
+      if (!reContext.value[index]) {
+        alert("답글을 입력하세요.");
+        return;
+      }
+      if (!reComments.value[index]) {
+        reComments.value[index] = [];
+      }
+      reComments.value[index].push({ comment: reContext.value[index] });
+      reContext.value[index] = "";
+    };
+
+    onMounted(() => {
+      post.value = props.user || {
+        title: "제목 없음",
+        content: "내용이 없습니다.",
+      };
     });
 
-    return { post, BackBut, EditBut };
+    return {
+      post,
+      newContext,
+      comments,
+      reComments,
+      reContext,
+      CommentsYn,
+      reModify,
+      editContext,
+      BackBut,
+      EditBut,
+      writeBut,
+      toggleReply,
+      toggleModify,
+      saveEdit,
+      cancelEdit,
+      reWritBut,
+    };
   },
 };
 </script>
 
 <style>
-/* 🔵 배경 스타일 */
+/* 배경 스타일 */
 .detail-container {
   display: flex;
   justify-content: center;
@@ -61,7 +189,7 @@ export default {
   background: linear-gradient(to bottom, #f0f4f8, #d9e2ec);
 }
 
-/* 📌 카드 스타일 */
+/* 카드 스타일 */
 .detail-card {
   width: 90%;
   max-width: 600px;
@@ -71,61 +199,151 @@ export default {
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* 🏷️ 제목 스타일 */
-.detail-header h2 {
-  font-size: 24px;
-  font-weight: bold;
-  color: #1f2937;
-  border-bottom: 4px solid #3498db;
-  padding-bottom: 8px;
-  margin-bottom: 16px;
+/* 댓글 입력 영역 */
+.comment-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
 }
 
-/* 📝 본문 스타일 */
-.detail-content h3 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 8px;
+.comment-input {
+  flex: 1;
+  width: 80%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
 }
 
-.detail-content p {
-  font-size: 16px;
-  line-height: 1.6;
-  color: #4a5568;
-}
-
-/* 🔙 버튼 스타일 */
-.detail-footer {
-  margin-top: 24px;
-  text-align: right;
-}
-
-.back-button {
-  display: inline-block;
-  padding: 10px 16px;
+.comment-button {
+  width: 60px;
+  padding: 8px;
+  font-size: 14px;
   background-color: #3498db;
   color: white;
-  font-size: 16px;
-  font-weight: 600;
+  border: none;
   border-radius: 8px;
-  text-decoration: none;
-  transition: background 0.3s;
+  cursor: pointer;
 }
 
+.comment-button:hover {
+  background-color: #217dbb;
+}
+
+/* 댓글 스타일 */
+.comment {
+  background: #f9f9f9;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+/*  input */
+.edit-input {
+  width: 80%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+/* .save-button,
+.cancel-button {
+  padding: 6px 10px;
+  margin-left: 5px;
+  font-size: 13px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.save-button {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.cancel-button {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.save-button:hover {
+  background-color: #27ae60;
+}
+
+.cancel-button:hover {
+  background-color: #c0392b;
+}
+
+.reply-button {
+  background: none;
+  border: none;
+  color: #3498db;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.reply-button:hover {
+  text-decoration: underline;
+} */
+
+/* 게시글 수정 버튼 (보라색) */
 .edit-button {
-  display: inline-block;
-  padding: 10px 16px;
-  background-color: #3498db;
+  background-color: #636e72;
   color: white;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 8px;
-  text-decoration: none;
-  transition: background 0.3s;
+}
+
+.edit-button:hover {
+  background-color: #636e72;
+}
+
+/* 댓글 수정 버튼 (초록색) */
+.save-button {
+  background-color: #636e72;
+  color: white;
+}
+
+.save-button:hover {
+  background-color: #636e72;
+}
+
+/* 취소 버튼 (빨간색) */
+.cancel-button {
+  background-color: #636e72;
+  color: white;
+}
+
+.cancel-button:hover {
+  background-color: #636e72;
+}
+
+/* 뒤로가기 버튼 (회색) */
+.back-button {
+  background-color: #636e72;
+  color: white;
 }
 
 .back-button:hover {
-  background-color: #217dbb;
+  background-color: #636e72;
+}
+
+/* 답글 버튼 (하늘색) */
+.reply-button {
+  background: none;
+  color: #3e3f44;
+  font-size: 12px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s;
+}
+
+.reply-button:hover {
+  color: #3e3f44;
+
+  text-decoration: underline;
 }
 </style>
