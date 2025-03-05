@@ -10,6 +10,24 @@ export const usePostStore = defineStore("postStore", () => {
   function getPostById(id) {
     return posts.value.find((post) => post.id === id);
   }
+  const newRePost = ref([]);
 
-  return { posts, getPostById };
+  function getRePostById(id) {
+    return newRePost.value.find((newRePost) => newRePost.id === id);
+  }
+
+  const toggleRePost = ref([]);
+
+  function gettogglePostById(id) {
+    return toggleRePost.value.find((toggleRePost) => toggleRePost.id === id);
+  }
+
+  return {
+    posts,
+    newRePost,
+    toggleRePost,
+    gettogglePostById,
+    getRePostById,
+    getPostById,
+  };
 });

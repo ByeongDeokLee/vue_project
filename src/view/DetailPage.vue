@@ -75,6 +75,7 @@
 <script>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { usePostStore } from "@/js/postStore";
 
 export default {
   name: "DetailPage",
@@ -89,6 +90,8 @@ export default {
     const CommentsYn = ref({});
     const reModify = ref({});
     const editContext = ref({});
+
+    const store = usePostStore();
 
     // 뒤로가기 버튼
     const BackBut = () => {
@@ -107,7 +110,11 @@ export default {
         alert("댓글을 입력하세요.");
         return;
       }
-      comments.value.push({ comment: newContext.value });
+      comments.value.push({
+        BoardId: props.user.id,
+        commentsId: comments.value.length + 1,
+        comment: newContext.value,
+      });
       newContext.value = "";
     };
 
@@ -155,6 +162,12 @@ export default {
         title: "제목 없음",
         content: "내용이 없습니다.",
       };
+
+      for (var i = 0; i < store.newRePost.length; i++) {
+        if (store.newRePost[i].BoardId == props.user.id) {
+          comments.value = store.newRePost;
+        }
+      }
     });
 
     return {
