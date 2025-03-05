@@ -25,6 +25,11 @@
         <div v-for="(comment, index) in comments" :key="index" class="comment">
           <template v-if="!reModify[index]">
             <span class="comment-text">{{ comment.comment }}</span>
+            <input type="checkbox" v-model="comment.checked" @click.stop />
+            <button @click="deleteCheckedPosts" class="delete-btn">
+              선택 삭제
+            </button>
+
             <button @click="toggleModify(index)" class="edit-button">
               수정
             </button>
@@ -73,7 +78,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { usePostStore } from "@/js/postStore";
 
@@ -83,11 +88,16 @@ export default {
   setup(props, { emit }) {
     const post = ref(null);
     const router = useRouter();
-    const comments = ref([]);
+    //댓글 배열
+    const comments = computed(() => store.newRePost || []);
     const newContext = ref("");
-    const reComments = ref({});
+
+    //대댓글 배열
+    const reComments = computed(() => store.toggleRePost || {});
     const reContext = ref({});
     const CommentsYn = ref({});
+
+    //수정
     const reModify = ref({});
     const editContext = ref({});
 
@@ -110,12 +120,17 @@ export default {
         alert("댓글을 입력하세요.");
         return;
       }
-      comments.value.push({
+
+      const newContentPost = {
         BoardId: props.user.id,
         commentsId: comments.value.length + 1,
         comment: newContext.value,
-      });
-      newContext.value = "";
+        checked: false,
+      };
+
+      store.newRePost.push(newContentPost);
+
+      newContentPost.value = "";
     };
 
     // 댓글 수정 모드 토글
@@ -150,11 +165,20 @@ export default {
         alert("답글을 입력하세요.");
         return;
       }
-      if (!reComments.value[index]) {
-        reComments.value[index] = [];
+      // if (!reComments.value[index]) {
+      //   reComments.value[index] = [];
+      // }
+      // reComments.value[index].push({ comment: reContext.value[index] });
+      // reContext.value[index] = "";
+
+      if (!store.toggleRePost[index]) {
+        store.toggleRePost[index] = [];
       }
-      reComments.value[index].push({ comment: reContext.value[index] });
-      reContext.value[index] = "";
+      store.toggleRePost[index].push({
+        comment: reContext.value[index],
+        checked: false,
+      });
+      //store.toggleRePost[index] = "";
     };
 
     onMounted(() => {
@@ -162,12 +186,6 @@ export default {
         title: "제목 없음",
         content: "내용이 없습니다.",
       };
-
-      for (var i = 0; i < store.newRePost.length; i++) {
-        if (store.newRePost[i].BoardId == props.user.id) {
-          comments.value = store.newRePost;
-        }
-      }
     });
 
     return {
@@ -193,170 +211,171 @@ export default {
 </script>
 
 <style>
-/* 배경 스타일 */
+/* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+}
+
 .detail-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: linear-gradient(to bottom, #f0f4f8, #d9e2ec);
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* 카드 스타일 */
 .detail-card {
-  width: 90%;
-  max-width: 600px;
-  background: white;
-  padding: 24px;
-  border-radius: 16px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  padding: 20px;
+  border-radius: 10px;
 }
 
-/* 댓글 입력 영역 */
+.detail-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+h2 {
+  font-size: 1.8em;
+  color: #333;
+}
+
+h3 {
+  font-size: 1.5em;
+  color: #555;
+}
+
+.detail-content {
+  margin-bottom: 20px;
+}
+
+.detail-footer {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 20px;
+}
+
+button {
+  background-color: #d3d3d3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #d3d3d3;
+}
+
 .comment-form {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 12px;
+  justify-content: space-between;
+  margin-top: 20px;
 }
 
 .comment-input {
-  flex: 1;
-  width: 80%;
+  width: 85%;
   padding: 10px;
+  border-radius: 5px;
   border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 14px;
+  font-size: 1em;
 }
 
 .comment-button {
-  width: 60px;
-  padding: 8px;
-  font-size: 14px;
-  background-color: #3498db;
-  color: white;
+  width: 12%;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #d3d3d3;
   border: none;
-  border-radius: 8px;
-  cursor: pointer;
 }
 
 .comment-button:hover {
-  background-color: #217dbb;
+  background-color: #d3d3d3;
 }
 
-/* 댓글 스타일 */
 .comment {
-  background: #f9f9f9;
-  padding: 8px 12px;
-  border-radius: 8px;
-  margin-top: 10px;
-  font-size: 14px;
-  display: flex;
-  flex-direction: column;
+  padding: 15px;
+  margin: 10px 0;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  border: 1px solid #ddd;
 }
 
-/*  input */
+.comment-text {
+  font-size: 1em;
+  color: #333;
+}
+
+.delete-btn,
+.edit-button,
+.reply-button {
+  margin-left: 10px;
+  background-color: #d3d3d3;
+}
+
+.delete-btn:hover,
+.edit-button:hover,
+.reply-button:hover {
+  background-color: #d3d3d3;
+}
+
 .edit-input {
   width: 80%;
   padding: 8px;
-  font-size: 14px;
+  border-radius: 5px;
   border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-/* .save-button,
-.cancel-button {
-  padding: 6px 10px;
-  margin-left: 5px;
-  font-size: 13px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+  font-size: 1em;
 }
 
 .save-button {
-  background-color: #2ecc71;
-  color: white;
-}
-
-.cancel-button {
-  background-color: #e74c3c;
-  color: white;
+  background-color: #d3d3d3;
 }
 
 .save-button:hover {
-  background-color: #27ae60;
+  background-color: #d3d3d3;
 }
 
-.cancel-button:hover {
-  background-color: #c0392b;
-}
-
-.reply-button {
-  background: none;
-  border: none;
-  color: #3498db;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.reply-button:hover {
-  text-decoration: underline;
-} */
-
-/* 게시글 수정 버튼 (보라색) */
-.edit-button {
-  background-color: #636e72;
-  color: white;
-}
-
-.edit-button:hover {
-  background-color: #636e72;
-}
-
-/* 댓글 수정 버튼 (초록색) */
-.save-button {
-  background-color: #636e72;
-  color: white;
-}
-
-.save-button:hover {
-  background-color: #636e72;
-}
-
-/* 취소 버튼 (빨간색) */
 .cancel-button {
-  background-color: #636e72;
-  color: white;
+  background-color: #d3d3d3;
 }
 
 .cancel-button:hover {
-  background-color: #636e72;
+  background-color: #d3d3d3;
 }
 
-/* 뒤로가기 버튼 (회색) */
-.back-button {
-  background-color: #636e72;
-  color: white;
+.reply-form {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
 }
 
-.back-button:hover {
-  background-color: #636e72;
+.reply-input {
+  width: 85%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
 
-/* 답글 버튼 (하늘색) */
-.reply-button {
-  background: none;
-  color: #3e3f44;
-  font-size: 12px;
-  padding: 4px;
-  border-radius: 4px;
-  transition: color 0.2s;
+.reply-submit {
+  width: 12%;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #d3d3d3;
 }
 
-.reply-button:hover {
-  color: #3e3f44;
+.reply-submit:hover {
+  background-color: #d3d3d3;
+}
 
-  text-decoration: underline;
+.reply {
+  margin-top: 10px;
+  padding-left: 20px;
+  background-color: #e9ecef;
+  border-left: 5px solid #d3d3d3;
 }
 </style>

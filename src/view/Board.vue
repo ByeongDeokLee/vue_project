@@ -31,7 +31,7 @@
 
 <script>
 import { usePostStore } from "@/js/postStore";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 
 export default {
@@ -41,7 +41,7 @@ export default {
     const newTitle = ref("");
     const newContent = ref("");
     const router = useRouter();
-    const posts = ref([]);
+    const posts = computed(() => store.posts);
 
     const store = usePostStore();
 
@@ -63,7 +63,8 @@ export default {
         checked: false, // 체크 여부 추가
       };
 
-      posts.value.push(newPost);
+      // posts.value.push(newPost);
+      store.posts.push(newPost);
 
       newTitle.value = "";
       newContent.value = "";
@@ -71,7 +72,8 @@ export default {
 
     // 선택된 게시물 삭제
     const deleteCheckedPosts = () => {
-      posts.value = posts.value.filter((post) => !post.checked);
+      console.log(store.posts);
+      store.posts = store.posts.filter((post) => !post.checked);
     };
 
     // 상세페이지 이동
@@ -83,9 +85,7 @@ export default {
 
     // 초기 게시물 로딩
     onMounted(() => {
-      console.log("게시물", store.posts);
-      posts.value = store.posts;
-      console.log("초기 게시물 로드됨:", posts.value);
+      // posts.value = store.posts;
     });
 
     return {

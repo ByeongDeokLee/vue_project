@@ -16,7 +16,7 @@ export const usePostStore = defineStore("postStore", () => {
     return newRePost.value.find((newRePost) => newRePost.id === id);
   }
 
-  const toggleRePost = ref([]);
+  const toggleRePost = ref({});
 
   function gettogglePostById(id) {
     return toggleRePost.value.find((toggleRePost) => toggleRePost.id === id);
