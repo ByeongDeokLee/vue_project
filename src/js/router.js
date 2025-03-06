@@ -3,6 +3,7 @@ import Login from "../view/Login.vue";
 import Board from "../view/Board.vue";
 import DetailPage from "../view/DetailPage.vue";
 import EditPage from "../view/EditPage.vue";
+import BoardWrite from "../view/BoardWrite";
 
 const routes = [
   { path: "/", component: Login },
@@ -20,6 +21,10 @@ const routes = [
     path: "/board/:id/editPage",
     component: EditPage,
     props: true,
+  },
+  {
+    path: "/boardWrite",
+    component: BoardWrite,
   },
 ];
 

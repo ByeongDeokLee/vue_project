@@ -1,16 +1,16 @@
 <template>
   <div class="board-container">
     <h2>게시판</h2>
-    <form @submit.prevent="addPost" class="post-form">
-      <input v-model="newTitle" type="text" placeholder="제목" required />
-      <textarea
-        v-model="newContent"
-        placeholder="게시글을 작성하세요"
-      ></textarea>
-      <button type="submit">작성</button>
-    </form>
 
     <div class="board-container-test">
+      <div class="option-container">
+        <div v-for="option in selectOption" :value="option" :key="option">
+          <button @click="selectOptionBut(option)" class="option-but">
+            {{ option.optionText }}
+          </button>
+        </div>
+      </div>
+      <button @click="boardListWrite" class="delete-btn">게시글 작성</button>
       <button @click="deleteCheckedPosts" class="delete-btn">선택 삭제</button>
 
       <transition-group name="fade" tag="div" class="board-list">
@@ -31,49 +31,37 @@
 
 <script>
 import { usePostStore } from "@/js/postStore";
-import { ref, onMounted, computed } from "vue";
+import { onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 
 export default {
   name: "BoardPage",
   props: ["user"],
   setup(props, { emit }) {
-    const newTitle = ref("");
-    const newContent = ref("");
     const router = useRouter();
     const posts = computed(() => store.posts);
+    const selectOption = computed(() => store.CommunityOption);
 
     const store = usePostStore();
 
-    // 게시물 추가
-    const addPost = () => {
-      if (!props.user) {
-        alert("로그인 후 이용 가능합니다.");
-        return;
-      }
-      if (!newTitle.value.trim() || !newContent.value.trim()) {
-        alert("제목과 내용을 입력하세요.");
-        return;
-      }
+    const boardListWrite = () => {
+      // if (!props.user) {
+      //   alert("로그인 후 이용 가능합니다.");
+      //   return;
+      // }
 
-      const newPost = {
-        id: posts.value.length + 1,
-        title: newTitle.value,
-        content: newContent.value,
-        checked: false, // 체크 여부 추가
-      };
-
-      // posts.value.push(newPost);
-      store.posts.push(newPost);
-
-      newTitle.value = "";
-      newContent.value = "";
+      router.push(`/boardWrite`);
     };
 
     // 선택된 게시물 삭제
     const deleteCheckedPosts = () => {
       console.log(store.posts);
       store.posts = store.posts.filter((post) => !post.checked);
+    };
+
+    //카테고리
+    const selectOptionBut = (option) => {
+      console.log("\n\n 카테고리 확인 \n\n\n", option);
     };
 
     // 상세페이지 이동
@@ -86,15 +74,16 @@ export default {
     // 초기 게시물 로딩
     onMounted(() => {
       // posts.value = store.posts;
+      console.log("\n\n 확인 \n\n", selectOption);
     });
 
     return {
-      newTitle,
-      newContent,
       posts,
-      addPost,
+      selectOption,
       boardIndexPage,
       deleteCheckedPosts,
+      boardListWrite,
+      selectOptionBut,
     };
   },
 };
@@ -136,7 +125,7 @@ h2 {
 
 .post-form button {
   padding: 0.5rem;
-  background: #ff9a9e;
+  background: #d3d3d3;
   color: white;
   border: none;
   border-radius: 5px;
@@ -145,7 +134,7 @@ h2 {
 }
 
 .post-form button:hover {
-  background: #ff758c;
+  background: #d3d3d3;
 }
 
 .board-list {
@@ -155,7 +144,7 @@ h2 {
 }
 
 .board-item {
-  background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+  background: linear-gradient(135deg, #d3d3d3, #f5f3f3);
   padding: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
@@ -176,5 +165,27 @@ h2 {
 .fade-leave-to {
   opacity: 0;
   transform: translateY(10px);
+}
+.option-container {
+  display: flex;
+  gap: 25px; /* 버튼 사이 간격 설정 */
+}
+
+.option-but {
+  display: inline-flex; /* 글씨 크기에 맞게 자동 조정 */
+  align-items: center;
+  justify-content: center;
+  padding: 10px; /* 내부 여백 */
+  font-size: 16px; /* 글씨 크기 */
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap; /* 글씨가 길어져도 줄바꿈 방지 */
+}
+
+.option-but:hover {
+  background-color: #d3d3d3;
 }
 </style>

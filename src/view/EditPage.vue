@@ -15,8 +15,10 @@
           placeholder="내용을 입력하세요"
         ></textarea>
 
-        <button type="submit">저장</button>
-        <router-link to="/board" class="cancel-button">취소</router-link>
+        <div>
+          <button type="submit">저장</button>
+          <router-link to="/board" class="cancel-button">취소</router-link>
+        </div>
       </form>
     </div>
   </div>
@@ -91,8 +93,8 @@ textarea {
 button {
   width: 100%;
   padding: 10px;
-  background-color: #3498db;
-  color: white;
+  background-color: #d3d3d3;
+  color: black;
   font-size: 16px;
   border: none;
   border-radius: 6px;
@@ -100,14 +102,14 @@ button {
 }
 
 button:hover {
-  background-color: #217dbb;
+  background-color: #d3d3d3;
 }
 
 .cancel-button {
   display: block;
   text-align: center;
   margin-top: 10px;
-  color: #555;
+  color: black;
   text-decoration: none;
 }
 

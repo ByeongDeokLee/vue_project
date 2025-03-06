@@ -2,10 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 export const usePostStore = defineStore("postStore", () => {
-  const posts = ref([
-    { id: 1, title: "첫 번째 게시글", content: "내용1" },
-    { id: 2, title: "두 번째 게시글", content: "내용2" },
-  ]);
+  const posts = ref([]);
 
   function getPostById(id) {
     return posts.value.find((post) => post.id === id);
@@ -22,10 +19,53 @@ export const usePostStore = defineStore("postStore", () => {
     return toggleRePost.value.find((toggleRePost) => toggleRePost.id === id);
   }
 
+  const CommunityOption = ref([
+    {
+      optionText: "전체",
+      optionId: "1",
+    },
+    {
+      optionText: "여행",
+      optionId: "2",
+    },
+    {
+      optionText: "자기계발",
+      optionId: "3",
+    },
+    {
+      optionText: "게임",
+      optionId: "4",
+    },
+    {
+      optionText: "게임",
+      optionId: "5",
+    },
+    {
+      optionText: "자동차",
+      optionId: "6",
+    },
+    {
+      optionText: "운동",
+      optionId: "7",
+    },
+    {
+      optionText: "기타",
+      optionId: "8",
+    },
+  ]);
+
+  function getCommunityOptionById(id) {
+    return CommunityOption.value.find(
+      (CommunityOption) => CommunityOption.id === id
+    );
+  }
+
   return {
     posts,
     newRePost,
     toggleRePost,
+    CommunityOption,
+    getCommunityOptionById,
     gettogglePostById,
     getRePostById,
     getPostById,

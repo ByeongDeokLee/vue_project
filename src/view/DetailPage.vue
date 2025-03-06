@@ -26,9 +26,6 @@
           <template v-if="!reModify[index]">
             <span class="comment-text">{{ comment.comment }}</span>
             <input type="checkbox" v-model="comment.checked" @click.stop />
-            <button @click="deleteCheckedPosts" class="delete-btn">
-              선택 삭제
-            </button>
 
             <button @click="toggleModify(index)" class="edit-button">
               수정
@@ -72,6 +69,9 @@
       <div class="detail-footer">
         <button @click="BackBut" class="back-button">뒤로 가기</button>
         <button @click="EditBut(post)" class="edit-button">수정 하기</button>
+        <button @click="deleteCheckedPosts" class="delete-btn">
+          선택 삭제
+        </button>
       </div>
     </div>
   </div>
@@ -375,7 +375,7 @@ button:hover {
 .reply {
   margin-top: 10px;
   padding-left: 20px;
-  background-color: #e9ecef;
+  background-color: #d3d3d3;
   border-left: 5px solid #d3d3d3;
 }
 </style>

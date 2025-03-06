@@ -143,8 +143,8 @@ export default {
 .login-button {
   width: 100%;
   padding: 10px;
-  background: #667eea;
-  color: white;
+  background: #d3d3d3;
+  color: black;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -152,7 +152,7 @@ export default {
 }
 
 .login-button:hover {
-  background: #5563c1;
+  background: #d3d3d3;
 }
 
 .fade-enter-active,
