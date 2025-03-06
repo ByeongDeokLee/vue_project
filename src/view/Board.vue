@@ -62,6 +62,7 @@ export default {
     //카테고리
     const selectOptionBut = (option) => {
       console.log("\n\n 카테고리 확인 \n\n\n", option);
+      //  store.posts = st
     };
 
     // 상세페이지 이동
