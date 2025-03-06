@@ -37,20 +37,16 @@ export const usePostStore = defineStore("postStore", () => {
       optionId: "4",
     },
     {
-      optionText: "게임",
+      optionText: "자동차",
       optionId: "5",
     },
     {
-      optionText: "자동차",
+      optionText: "운동",
       optionId: "6",
     },
     {
-      optionText: "운동",
-      optionId: "7",
-    },
-    {
       optionText: "기타",
-      optionId: "8",
+      optionId: "7",
     },
   ]);
 

@@ -46,13 +46,18 @@ export default {
         return;
       }
 
+      if (!selected.value) {
+        alert("옵션을 선택하세요");
+        return;
+      }
+
       const newPost = {
         id: posts.value.length + 1,
         title: newTitle.value,
         content: newContent.value,
         checked: false, // 체크 여부 추가
-        selectedText: selected.value.optionText,
-        selectedId: selected.value.optionId,
+        optionText: selected.value.optionText,
+        optionId: selected.value.optionId,
       };
 
       store.posts.push(newPost);

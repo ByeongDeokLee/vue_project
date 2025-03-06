@@ -1,6 +1,7 @@
 <template>
   <div class="login-container">
     <!-- 로그인 폼 -->
+    <button @click="NewPage">뉴스페이지 이동</button>
     <transition name="false">
       <form class="login-form" v-if="!isLoggedIn" @submit.prevent="handleLogin">
         <h2 class="title">로그인</h2>
@@ -84,6 +85,10 @@ export default {
       formDate.value.email = "";
     };
 
+    const NewPage = () => {
+      router.push({ path: "/newsPage" });
+    };
+
     //자동 로그인 확인
     onMounted(() => {
       localStorage.setItem("email", "1@n.com");
@@ -94,6 +99,7 @@ export default {
       errors,
       isLoggedIn,
       isValid,
+      NewPage,
       validateForm,
       handleLogin,
       logout,

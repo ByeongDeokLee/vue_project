@@ -1,11 +1,15 @@
 <template>
   <div class="board-container">
     <h2>게시판</h2>
-
+    <input v-model="searchKeyword" placeholder="검색어 입력" />
     <div class="board-container-test">
       <div class="option-container">
         <div v-for="option in selectOption" :value="option" :key="option">
-          <button @click="selectOptionBut(option)" class="option-but">
+          <button
+            @click="selectOptionBut(option)"
+            class="option-but"
+            :class="{ selected: selectOption === option.optionId }"
+          >
             {{ option.optionText }}
           </button>
         </div>
@@ -13,16 +17,21 @@
       <button @click="boardListWrite" class="delete-btn">게시글 작성</button>
       <button @click="deleteCheckedPosts" class="delete-btn">선택 삭제</button>
 
-      <transition-group name="fade" tag="div" class="board-list">
+      <transition-group
+        v-if="!searchYn"
+        name="fade"
+        tag="div"
+        class="board-list"
+      >
         <div
-          v-for="post in posts"
-          :key="post.id"
+          v-for="Category in CategoryList"
+          :key="Category.id"
           class="board-item"
           @click="boardIndexPage(post)"
         >
-          <h3>{{ post.title }}</h3>
-          <p>{{ post.content }}</p>
-          <input type="checkbox" v-model="post.checked" @click.stop />
+          <h3>{{ Category.title }}</h3>
+          <p>{{ Category.content }}</p>
+          <input type="checkbox" v-model="Category.checked" @click.stop />
         </div>
       </transition-group>
     </div>
@@ -31,7 +40,7 @@
 
 <script>
 import { usePostStore } from "@/js/postStore";
-import { onMounted, computed } from "vue";
+import { onMounted, computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
 export default {
@@ -41,6 +50,11 @@ export default {
     const router = useRouter();
     const posts = computed(() => store.posts);
     const selectOption = computed(() => store.CommunityOption);
+    const selCategoryBut = ref(null);
+
+    const CategoryList = ref([]);
+    const searchKeyword = ref("");
+    const searchYn = ref(false);
 
     const store = usePostStore();
 
@@ -61,10 +75,29 @@ export default {
 
     //카테고리
     const selectOptionBut = (option) => {
-      console.log("\n\n 카테고리 확인 \n\n\n", option);
-      //  store.posts = st
+      if (!posts.value.length) {
+        alert("게시된 게시글이 없습니다.");
+        return;
+      }
+      //기존 데이터 초기화
+      CategoryList.value = [];
+      selCategoryBut.value = option.optionId;
+      //카테고리 별 배열 추가
+      if (option.optionId == "1") {
+        CategoryList.value = posts.value;
+      } else {
+        CategoryList.value = CategoryList.value.concat(
+          posts.value.filter((post) => post.optionId === option.optionId)
+        );
+      }
     };
 
+    //검색기능(반응형 데이터 감시 기능)
+    watch(searchKeyword, (newKeyword) => {
+      CategoryList.value = posts.value.filter((post) =>
+        post.title.includes(newKeyword)
+      );
+    });
     // 상세페이지 이동
     const boardIndexPage = (post) => {
       console.log("데이터 확인", posts);
@@ -74,13 +107,16 @@ export default {
 
     // 초기 게시물 로딩
     onMounted(() => {
-      // posts.value = store.posts;
-      console.log("\n\n 확인 \n\n", selectOption);
+      CategoryList.value = posts.value;
     });
 
     return {
       posts,
       selectOption,
+      CategoryList,
+      searchKeyword,
+      searchYn,
+      selCategoryBut,
       boardIndexPage,
       deleteCheckedPosts,
       boardListWrite,
@@ -178,8 +214,8 @@ h2 {
   justify-content: center;
   padding: 10px; /* 내부 여백 */
   font-size: 16px; /* 글씨 크기 */
-  background-color: #3498db;
-  color: white;
+  background-color: lightgray;
+  color: black;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -188,5 +224,10 @@ h2 {
 
 .option-but:hover {
   background-color: #d3d3d3;
+}
+
+.selected {
+  background-color: blue !important; /* 선택된 버튼의 배경색 */
+  color: white;
 }
 </style>

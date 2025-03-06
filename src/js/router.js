@@ -3,7 +3,8 @@ import Login from "../view/Login.vue";
 import Board from "../view/Board.vue";
 import DetailPage from "../view/DetailPage.vue";
 import EditPage from "../view/EditPage.vue";
-import BoardWrite from "../view/BoardWrite";
+import BoardWrite from "../view/BoardWrite.vue";
+import NewsPage from "../view/News.vue";
 
 const routes = [
   { path: "/", component: Login },
@@ -25,6 +26,10 @@ const routes = [
   {
     path: "/boardWrite",
     component: BoardWrite,
+  },
+  {
+    path: "/newsPage",
+    component: NewsPage,
   },
 ];
 
