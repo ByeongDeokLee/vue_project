@@ -1,7 +1,8 @@
 <template>
   <div class="login-container">
     <!-- 로그인 폼 -->
-    <button @click="NewPage">뉴스페이지 이동</button>
+    <button class="news-but" @click="NewPage">뉴스페이지 이동</button>
+    <div id="naver_id_login"></div>
     <transition name="false">
       <form class="login-form" v-if="!isLoggedIn" @submit.prevent="handleLogin">
         <h2 class="title">로그인</h2>
@@ -93,6 +94,25 @@ export default {
     onMounted(() => {
       localStorage.setItem("email", "1@n.com");
       localStorage.setItem("pwd", "1");
+
+      // Naver 로그인 초기화
+      const clientId = "nPQvqYv2ZtubwhQzisDn"; // 여기에 네이버 개발자 센터에서 발급받은 클라이언트 ID를 넣어야 합니다.
+      const naverLogin = new window.naver_id_login(
+        clientId,
+        "http://localhost:8080/" // 개발자센터에서 등록한 Callback URL
+      );
+
+      // 고유 상태값 설정
+      const state = naverLogin.getUniqState();
+      naverLogin.setButton("white", 2, 40); // 버튼설정
+      naverLogin.setDomain("http://localhost:8080");
+      naverLogin.setState(state);
+
+      // 팝업 설정 (필요 시 주석 해제)
+      // naverLogin.setPopup();
+
+      // Naver 로그인 버튼 초기화
+      naverLogin.init_naver_id_login();
     });
     return {
       formDate,
@@ -168,5 +188,11 @@ export default {
 .fade-enter,
 .fade-leave-to {
   opacity: 0;
+}
+.news-but {
+  width: 100px;
+}
+.naver_id_login {
+  width: 100px;
 }
 </style>

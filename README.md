@@ -51,3 +51,9 @@ Compostion API
 재사용성 : Composition Function으로 재사용 가능
 성능 : 가벼운 코드 실행 & 성능 최적화
 Vue 버전 : Vue 3 기본
+
+------------------네이버 중요정보----------
+네이버 로그인 오픈 API Client ID = nPQvqYv2ZtubwhQzisDn
+네이버 로그인 오픈 API Client Secret = lVR8yLXry2
+
+--------------내위치 찾아서 날씨 뿌리기---
