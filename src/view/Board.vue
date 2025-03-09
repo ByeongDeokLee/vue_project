@@ -70,7 +70,7 @@ export default {
     // 선택된 게시물 삭제
     const deleteCheckedPosts = () => {
       console.log(store.posts);
-      store.posts = store.posts.filter((post) => !post.checked);
+      CategoryList.value = CategoryList.value.filter((post) => !post.checked);
     };
 
     //카테고리

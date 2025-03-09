@@ -1,8 +1,12 @@
 <template>
   <div class="login-container">
+    <template>
+      <div id="map">맵</div>
+    </template>
     <!-- 로그인 폼 -->
     <button class="news-but" @click="NewPage">뉴스페이지 이동</button>
-    <div id="naver_id_login"></div>
+    <button class="news-but" @click="naverLoginBtn">네이버 로그인</button>
+    <!-- <div id="naver_id_login"></div> -->
     <transition name="false">
       <form class="login-form" v-if="!isLoggedIn" @submit.prevent="handleLogin">
         <h2 class="title">로그인</h2>
@@ -36,6 +40,11 @@
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
+// Naver 로그인 초기화
+const clientId = "nPQvqYv2ZtubwhQzisDn"; // 여기에 네이버 개발자 센터에서 발급받은 클라이언트 ID를 넣어야 합니다.
+const redirectUri = encodeURIComponent("http://localhost:8081/naverLogin"); // 인코딩 필수!
+const state = Math.random().toString(36).substring(7);
+
 export default {
   name: "LoginPage",
   emits: ["login"],
@@ -54,8 +63,6 @@ export default {
       errors.value.email = /\S+@\S+\.\S+/.test(formDate.value.email)
         ? ""
         : "올바른 이메일 형식을 입력하세요.";
-      // errors.value.pwd =
-      //   formDate.value.pwd.length >= 5 ? "" : "정확한 비밀번호를 입력하세요";
 
       isValid.value = !errors.value.email && !errors.value.pwd;
     };
@@ -77,6 +84,9 @@ export default {
       }
     };
 
+    //네이버 지도
+    const mapOptions = () => {};
+
     //로그아웃
     const logout = () => {
       localStorage.removeItem("pwd");
@@ -90,35 +100,26 @@ export default {
       router.push({ path: "/newsPage" });
     };
 
+    const naverLoginBtn = () => {
+      const loginUrl = `http://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
+      window.location.href = loginUrl; // 네이버 로그인 페이지로 이동
+    };
+
     //자동 로그인 확인
     onMounted(() => {
       localStorage.setItem("email", "1@n.com");
       localStorage.setItem("pwd", "1");
-
-      // Naver 로그인 초기화
-      const clientId = "nPQvqYv2ZtubwhQzisDn"; // 여기에 네이버 개발자 센터에서 발급받은 클라이언트 ID를 넣어야 합니다.
-      const naverLogin = new window.naver_id_login(
-        clientId,
-        "http://localhost:8080/" // 개발자센터에서 등록한 Callback URL
-      );
-
-      // 고유 상태값 설정
-      const state = naverLogin.getUniqState();
-      naverLogin.setButton("white", 2, 40); // 버튼설정
-      naverLogin.setDomain("http://localhost:8080");
-      naverLogin.setState(state);
-
-      // 팝업 설정 (필요 시 주석 해제)
-      // naverLogin.setPopup();
-
-      // Naver 로그인 버튼 초기화
-      naverLogin.init_naver_id_login();
     });
     return {
       formDate,
       errors,
       isLoggedIn,
       isValid,
+      clientId,
+      redirectUri,
+      state,
+      mapOptions,
+      naverLoginBtn,
       NewPage,
       validateForm,
       handleLogin,
