@@ -39,10 +39,10 @@ export default {
     const store = usePostStore();
 
     onMounted(() => {
-      // 1️⃣ props를 통해 데이터가 넘어왔을 경우
+      //  props를 통해 데이터가 넘어왔을 경우
       if (props.user) {
         editedPost.value = { ...props.user };
-      } // 3️⃣ 데이터가 없을 경우 기본값 설정
+      } //  데이터가 없을 경우 기본값 설정
       else {
         editedPost.value = { title: "제목 없음", content: "내용이 없습니다." };
       }

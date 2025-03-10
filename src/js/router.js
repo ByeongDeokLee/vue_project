@@ -5,7 +5,8 @@ import DetailPage from "../view/DetailPage.vue";
 import EditPage from "../view/EditPage.vue";
 import BoardWrite from "../view/BoardWrite.vue";
 import NewsPage from "../view/News.vue";
-import NaverLogin from "../view/NaverLogin";
+import NaverLogin from "../view/NaverLogin.vue";
+import NaverMap from "../view/NaverMap.vue";
 
 const routes = [
   { path: "/", component: Login },
@@ -35,6 +36,10 @@ const routes = [
   {
     path: "/naverLogin",
     component: NaverLogin,
+  },
+  {
+    path: "/naverMap",
+    component: NaverMap,
   },
 ];
 

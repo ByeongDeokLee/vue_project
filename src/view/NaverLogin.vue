@@ -23,28 +23,41 @@ export default {
     const nickname = ref("");
     const router = useRouter();
 
-    // ✅ URL에서 'code' 추출
+    // URL에서 'code' 추출
     const getAuthCodeFromUrl = () => {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get("code"); // 로그인 성공 시 네이버가 넘겨주는 인증 코드
     };
 
-    // ✅ Access Token 요청
+    // Access Token 요청
     const getAccessToken = async (code) => {
       try {
-        const url = `http://nid.naver.com/oauth2.0/token?grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&redirect_uri=${encodeURIComponent(
+        /*       const url = `http://nid.naver.com/oauth2.0/token?grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&redirect_uri=${encodeURIComponent(
           redirectUri
         )}&code=${code}&state=RANDOM_STRING`;
 
         const { data } = await axios.get(url);
-        accessToken.value = data.access_token;
+        accessToken.value = data.access_token; */
+
+        const response = await axios.post(
+          "http://localhost:8080/api/naver/token",
+          {
+            grant_type: "authorization_code",
+            client_id: clientId,
+            client_secret: clientSecret,
+            redirect_uri: redirectUri,
+            code: code,
+          }
+        );
+
+        accessToken.value = response.access_token;
         getUserInfo();
       } catch (error) {
         console.error("Error fetching access token:", error);
       }
     };
 
-    // ✅ 사용자 프로필 조회
+    // 사용자 프로필 조회
     const getUserInfo = async () => {
       try {
         const url = "https://openapi.naver.com/v1/nid/me";
@@ -58,7 +71,7 @@ export default {
       }
     };
 
-    // ✅ 로그아웃
+    // 로그아웃
     const logout = () => {
       accessToken.value = "";
       email.value = "";
@@ -66,7 +79,7 @@ export default {
       router.push("/");
     };
 
-    // ✅ 최초 실행 시 Access Token 요청
+    // 최초 실행 시 Access Token 요청
     onMounted(() => {
       const code = getAuthCodeFromUrl();
       if (code) {
