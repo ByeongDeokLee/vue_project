@@ -7,6 +7,7 @@ import BoardWrite from "../view/BoardWrite.vue";
 import NewsPage from "../view/News.vue";
 import NaverLogin from "../view/NaverLogin.vue";
 import NaverMap from "../view/NaverMap.vue";
+import Calendar from "../view/Calendar.vue";
 
 const routes = [
   { path: "/", component: Login },
@@ -40,6 +41,10 @@ const routes = [
   {
     path: "/naverMap",
     component: NaverMap,
+  },
+  {
+    path: "/Calendar",
+    component: Calendar,
   },
 ];
 

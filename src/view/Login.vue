@@ -4,12 +4,11 @@
       <div id="map">맵</div>
     </template>
     <!-- 로그인 폼 -->
-    <button class="news-but" @click="NewPage">뉴스페이지 이동</button>
-    <button class="news-but" @click="naverLoginBtn">네이버 로그인</button>
-    <button class="news-but" @click="naverMapBtn">네이버 지도</button>
+
     <!-- <div id="naver_id_login"></div> -->
     <transition name="false">
       <form class="login-form" v-if="!isLoggedIn" @submit.prevent="handleLogin">
+        <div class="Calendar-btn" @click="CalendarBtn"></div>
         <h2 class="title">로그인</h2>
         <input
           v-model="formDate.email"
@@ -29,7 +28,11 @@
           class="input-field"
         />
         <p v-if="errors.pwd" class="error">{{ errors.pwd }}</p>
-
+        <button class="login-button" @click="NewPage">뉴스페이지 이동</button>
+        <button class="login-button" @click="naverLoginBtn">
+          네이버 로그인
+        </button>
+        <button class="login-button" @click="naverMapBtn">네이버 지도</button>
         <button type="submit" class="login-button">로그인</button>
       </form>
     </transition>
@@ -98,6 +101,10 @@ export default {
       router.push({ path: "/newsPage" });
     };
 
+    const CalendarBtn = () => {
+      router.push({ path: "/Calendar" });
+    };
+
     const naverLoginBtn = () => {
       const loginUrl = `http://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
       window.location.href = loginUrl; // 네이버 로그인 페이지로 이동
@@ -119,6 +126,7 @@ export default {
       clientId,
       redirectUri,
       state,
+      CalendarBtn,
       naverMapBtn,
       naverLoginBtn,
       NewPage,
@@ -196,5 +204,10 @@ export default {
 }
 .naver_id_login {
   width: 100px;
+}
+.Calendar-btn {
+  width: 30px;
+  height: 30px;
+  background-image: url("@/img/Calendar.webp");
 }
 </style>
