@@ -16,7 +16,7 @@
       </div>
       <button @click="boardListWrite" class="delete-btn">게시글 작성</button>
       <button @click="deleteCheckedPosts" class="delete-btn">선택 삭제</button>
-
+      <LoginPopup v-if="showModal" :user="user" @close="handleClose" />
       <transition-group
         v-if="!searchYn"
         name="fade"
@@ -42,10 +42,14 @@
 import { usePostStore } from "@/js/postStore";
 import { onMounted, computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
+import LoginPopup from "@/view/LoginPopup.vue";
 
 export default {
   name: "BoardPage",
   props: ["user"],
+  components: {
+    LoginPopup,
+  },
   setup(props, { emit }) {
     const router = useRouter();
     const posts = computed(() => store.posts);
@@ -56,15 +60,19 @@ export default {
     const searchKeyword = ref("");
     const searchYn = ref(false);
 
+    const showModal = ref(false);
+
     const CalendarList = computed(() => store.CalendarRePost);
 
     const store = usePostStore();
 
     const boardListWrite = () => {
-      // if (!props.user) {
-      //   alert("로그인 후 이용 가능합니다.");
-      //   return;
-      // }
+      if (!props.user) {
+        // alert("로그인 후 이용 가능합니다.");
+        // router.push(`/LoginPoup`);
+        showModal.value = true;
+        return;
+      }
 
       router.push(`/boardWrite`);
     };
@@ -73,6 +81,12 @@ export default {
     const deleteCheckedPosts = () => {
       console.log(store.posts);
       CategoryList.value = CategoryList.value.filter((post) => !post.checked);
+    };
+
+    //로그인 팝업 닫기
+    const handleClose = (data) => {
+      console.log(data); // 자식에서 전달된 데이터 (LoginFrom)
+      showModal.value = false; // 모달 닫기
     };
 
     //카테고리
@@ -100,9 +114,9 @@ export default {
         post.title.includes(newKeyword)
       );
     });
+
     // 상세페이지 이동
     const boardIndexPage = (post) => {
-      console.log("데이터 확인", posts);
       emit("login", post);
       router.push(`/board/${post.id}`);
     };
@@ -111,10 +125,9 @@ export default {
     onMounted(() => {
       CategoryList.value = posts.value;
       console.log(
-        "게시물 확인",
+        "날짜",
         CalendarList.value.map((d) => d.toLocaleDateString("ko-KR"))
       );
-      console.log("게시물 확인", posts.value);
     });
 
     return {
@@ -123,6 +136,8 @@ export default {
       CategoryList,
       searchKeyword,
       searchYn,
+      showModal,
+      handleClose,
       selCategoryBut,
       CalendarList,
       boardIndexPage,

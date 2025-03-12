@@ -28,12 +28,13 @@
           class="input-field"
         />
         <p v-if="errors.pwd" class="error">{{ errors.pwd }}</p>
+        <button type="submit" class="login-button">로그인</button>
         <button class="login-button" @click="NewPage">뉴스페이지 이동</button>
         <button class="login-button" @click="naverLoginBtn">
           네이버 로그인
         </button>
         <button class="login-button" @click="naverMapBtn">네이버 지도</button>
-        <button type="submit" class="login-button">로그인</button>
+        <p @click="MemberJoinBtn">회원가입</p>
       </form>
     </transition>
     <button v-if="isLoggedIn" @click="logout" class="logout">로그아웃</button>
@@ -109,10 +110,17 @@ export default {
       const loginUrl = `http://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
       window.location.href = loginUrl; // 네이버 로그인 페이지로 이동
     };
+
     //네이버 지도
     const naverMapBtn = () => {
       router.push({ path: "/naverMap" });
     };
+
+    //회원가입 페이지
+    const MemberJoinBtn = () => {
+      router.push(`/MemberJoin`);
+    };
+
     //자동 로그인 확인
     onMounted(() => {
       localStorage.setItem("email", "1@n.com");
@@ -126,6 +134,7 @@ export default {
       clientId,
       redirectUri,
       state,
+      MemberJoinBtn,
       CalendarBtn,
       naverMapBtn,
       naverLoginBtn,
@@ -208,6 +217,6 @@ export default {
 .Calendar-btn {
   width: 30px;
   height: 30px;
-  background-image: url("../img/Calendar.webp");
+  background-image: url("@/img/Calendar.webp");
 }
 </style>

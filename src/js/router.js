@@ -8,6 +8,7 @@ import NewsPage from "../view/News.vue";
 import NaverLogin from "../view/NaverLogin.vue";
 import NaverMap from "../view/NaverMap.vue";
 import Calendar from "../view/Calendar.vue";
+import MemberJoin from "../view/memberJoin.vue";
 
 const routes = [
   { path: "/", component: Login },
@@ -45,6 +46,10 @@ const routes = [
   {
     path: "/Calendar",
     component: Calendar,
+  },
+  {
+    path: "/MemberJoin",
+    component: MemberJoin,
   },
 ];
 
