@@ -56,6 +56,8 @@ export default {
     const searchKeyword = ref("");
     const searchYn = ref(false);
 
+    const CalendarList = computed(() => store.CalendarRePost);
+
     const store = usePostStore();
 
     const boardListWrite = () => {
@@ -108,6 +110,11 @@ export default {
     // 초기 게시물 로딩
     onMounted(() => {
       CategoryList.value = posts.value;
+      console.log(
+        "게시물 확인",
+        CalendarList.value.map((d) => d.toLocaleDateString("ko-KR"))
+      );
+      console.log("게시물 확인", posts.value);
     });
 
     return {
@@ -117,6 +124,7 @@ export default {
       searchKeyword,
       searchYn,
       selCategoryBut,
+      CalendarList,
       boardIndexPage,
       deleteCheckedPosts,
       boardListWrite,

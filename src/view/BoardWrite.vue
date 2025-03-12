@@ -25,7 +25,7 @@
 
 <script>
 import { usePostStore } from "@/js/postStore";
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 
 export default {
@@ -37,6 +37,8 @@ export default {
     const selected = ref("");
     const router = useRouter();
     const selectOption = computed(() => store.CommunityOption);
+
+    const today = new Date();
 
     const store = usePostStore();
     // 게시물 추가
@@ -58,6 +60,7 @@ export default {
         checked: false, // 체크 여부 추가
         optionText: selected.value.optionText,
         optionId: selected.value.optionId,
+        WriteDate: today.toLocaleDateString("ko-KR"),
       };
 
       store.posts.push(newPost);
@@ -66,6 +69,10 @@ export default {
       newContent.value = "";
       router.push(`/board`);
     };
+
+    onMounted(() => {
+      // console.log("\n\n today \n\n\n", today);
+    });
 
     return {
       posts,
