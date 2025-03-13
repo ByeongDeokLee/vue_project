@@ -1,45 +1,55 @@
 <template>
   <div class="board-container">
     <h2>게시판</h2>
-    <input v-model="searchKeyword" placeholder="검색어 입력" />
-    <div class="board-container-test">
-      <div class="option-container">
-        <div v-for="option in selectOption" :value="option" :key="option">
-          <button
-            @click="selectOptionBut(option)"
-            class="option-but"
-            :class="{ selected: selectOption === option.optionId }"
-          >
-            {{ option.optionText }}
-          </button>
-        </div>
-      </div>
-      <button @click="boardListWrite" class="delete-btn">게시글 작성</button>
-      <button @click="deleteCheckedPosts" class="delete-btn">선택 삭제</button>
-      <LoginPopup
-        v-if="showLoginModal"
-        :user="user"
-        @close="handleLoginClose"
-      />
-      <BoardWrite v-if="showBoardWriModal" @close="handleBoardWriClose" />
-      <transition-group
-        v-if="!searchYn"
-        name="fade"
-        tag="div"
-        class="board-list"
-      >
-        <div
-          v-for="Category in CategoryList"
-          :key="Category.id"
-          class="board-item"
-          @click="boardIndexPage(Category.id)"
-        >
-          <h3>{{ Category.title }}</h3>
-          <p>{{ Category.content }}</p>
-          <input type="checkbox" v-model="Category.checked" @click.stop />
-        </div>
-      </transition-group>
+
+    <div class="button-group">
+      <button @click="CalendarBtn" class="action-btn">캘린더 보기</button>
+      <button @click="NewPage" class="action-btn">뉴스 페이지 이동</button>
+      <button @click="naverLoginBtn" class="action-btn">네이버 로그인</button>
+      <button @click="naverMapBtn" class="action-btn">네이버 지도</button>
     </div>
+
+    <Calendar v-if="showCalendarModel" @close="handleCalendarClose" />
+
+    <input
+      v-model="searchKeyword"
+      placeholder="검색어를 입력하세요"
+      class="search-input"
+    />
+
+    <div class="board-actions">
+      <div class="option-container">
+        <button
+          v-for="option in selectOption"
+          :key="option.optionId"
+          @click="selectOptionBut(option)"
+          class="option-btn"
+          :class="{ selected: selCategoryBut === option.optionId }"
+        >
+          {{ option.optionText }}
+        </button>
+      </div>
+    </div>
+    <div class="write-actions">
+      <button @click="boardListWrite" class="primary-btn">게시글 작성</button>
+      <button @click="deleteCheckedPosts" class="danger-btn">선택 삭제</button>
+    </div>
+
+    <LoginPopup v-if="showLoginModal" :user="user" @close="handleLoginClose" />
+    <BoardWrite v-if="showBoardWriModal" @close="handleBoardWriClose" />
+
+    <transition-group v-if="!searchYn" name="fade" tag="div" class="board-list">
+      <div
+        v-for="Category in CategoryList"
+        :key="Category.id"
+        class="board-item"
+        @click="boardIndexPage(Category.id)"
+      >
+        <h3>{{ Category.title }}</h3>
+        <p>{{ Category.content }}</p>
+        <input type="checkbox" v-model="Category.checked" @click.stop />
+      </div>
+    </transition-group>
   </div>
 </template>
 
@@ -49,12 +59,19 @@ import { onMounted, computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import LoginPopup from "@/view/LoginPopup.vue";
 import BoardWrite from "@/view/BoardWrite.vue";
+import Calendar from "@/view/Calendar.vue";
+
+// Naver 로그인 초기화
+const clientId = "nPQvqYv2ZtubwhQzisDn"; // 여기에 네이버 개발자 센터에서 발급받은 클라이언트 ID를 넣어야 합니다.
+const redirectUri = encodeURIComponent("http://localhost:8080/naverLogin"); // 인코딩 필수!
+const state = Math.random().toString(36).substring(7);
 
 export default {
   name: "BoardPage",
   components: {
     LoginPopup,
     BoardWrite,
+    Calendar,
   },
   setup(_, { emit }) {
     const router = useRouter();
@@ -66,8 +83,10 @@ export default {
     const searchKeyword = ref("");
     const searchYn = ref(false);
 
+    //페이지 노출 조건 변수
     const showLoginModal = ref(false);
     const showBoardWriModal = ref(false);
+    const showCalendarModel = ref(false);
 
     const LoginDataForm = ref({});
 
@@ -76,15 +95,11 @@ export default {
     const store = usePostStore();
 
     const boardListWrite = () => {
-      console.log(!LoginDataForm.value);
-      if (!LoginDataForm.value) {
-        // alert("로그인 후 이용 가능합니다.");
-        // router.push(`/LoginPoup`);
+      if (!LoginDataForm.value.username || !LoginDataForm.value.password) {
         showLoginModal.value = true;
         return;
       }
       showBoardWriModal.value = true;
-      // router.push(`/boardWrite`);
     };
 
     // 선택된 게시물 삭제
@@ -102,6 +117,34 @@ export default {
     //게시글 작성 팝업 닫기
     const handleBoardWriClose = () => {
       showBoardWriModal.value = false; // 모달 닫기
+    };
+
+    //캘린더 팝업 닫기
+    const handleCalendarClose = () => {
+      CategoryList.value = [];
+
+      for (let i = 0; i < store.CalendarRePost.length; i++) {
+        for (let j = 0; j < CategoryList.value.length; j++) {
+          const calendarDate = store.CalendarRePost[i];
+          const categoryDate = CategoryList[j].value.writeDate;
+
+          // 날짜 비교 (year, month, day 각각 비교)
+          if (
+            calendarDate.year === new Date(categoryDate).getFullYear() &&
+            calendarDate.month === new Date(categoryDate).getMonth() &&
+            calendarDate.day === new Date(categoryDate).getDate()
+          ) {
+            // 중복 방지: 이미 추가된 값인지 확인
+            if (
+              !CategoryList.value.some((item) => item === CategoryList[j].value)
+            ) {
+              CategoryList.value.push(CategoryList[j].value);
+            }
+          }
+        }
+      }
+
+      showCalendarModel.value = false; // 모달 닫기
     };
 
     //카테고리
@@ -130,20 +173,35 @@ export default {
       );
     });
 
+    //네이버 로그인 버튼
+    const naverLoginBtn = () => {
+      const loginUrl = `http://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
+      window.location.href = loginUrl; // 네이버 로그인 페이지로 이동
+    };
+
     // 상세페이지 이동
     const boardIndexPage = (post) => {
-      console.log(post);
       emit("login", post);
       router.push(`/board/${post}`);
+    };
+    // 뉴스 페이지
+    const NewPage = () => {
+      router.push({ path: "/newsPage" });
+    };
+
+    //캘린더
+    const CalendarBtn = () => {
+      showCalendarModel.value = true;
+    };
+
+    //네이버 지도
+    const naverMapBtn = () => {
+      router.push({ path: "/naverMap" });
     };
 
     // 초기 게시물 로딩
     onMounted(() => {
       CategoryList.value = posts.value;
-      LoginDataForm.value.email = localStorage.getItem("email");
-      LoginDataForm.value.pwd = localStorage.getItem("pwd");
-
-      console.log(CategoryList.value);
     });
 
     return {
@@ -154,10 +212,16 @@ export default {
       searchYn,
       showLoginModal,
       showBoardWriModal,
+      naverLoginBtn,
       handleLoginClose,
       handleBoardWriClose,
+      showCalendarModel,
       selCategoryBut,
+      naverMapBtn,
+      NewPage,
       CalendarList,
+      CalendarBtn,
+      handleCalendarClose,
       boardIndexPage,
       deleteCheckedPosts,
       boardListWrite,
@@ -170,68 +234,127 @@ export default {
 <style scoped>
 .board-container {
   padding: 2rem;
-  max-width: 700px;
+  max-width: 800px;
   margin: 0 auto;
-  background: #ffffff;
+  background: #fff;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-.board-container-test {
-  padding: 2rem;
-  max-width: 600px;
-  margin: 0 auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 h2 {
   text-align: center;
   color: #333;
+  margin-bottom: 1.5rem;
 }
 
-.post-form {
+.button-group {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 1.5rem;
 }
 
-.post-form input,
-.post-form textarea {
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-}
-
-.post-form button {
-  padding: 0.5rem;
-  background: #d3d3d3;
-  color: white;
+.action-btn {
+  padding: 10px 16px;
   border: none;
-  border-radius: 5px;
+  background-color: #f0f0f0;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background-color 0.3s;
 }
 
-.post-form button:hover {
-  background: #d3d3d3;
+.action-btn:hover {
+  background-color: #dcdcdc;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.board-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.option-container {
+  display: flex;
+  gap: 10px;
+}
+
+.option-btn {
+  padding: 8px 14px;
+  background-color: #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.option-btn.selected {
+  background-color: red;
+  color: #fff;
+}
+
+.option-btn:hover {
+  background-color: #bbb;
+}
+
+.write-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.primary-btn,
+.danger-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.primary-btn {
+  background-color: #e0e0e0;
+  color: black;
+}
+
+.primary-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.danger-btn {
+  background-color: #e0e0e0;
+  color: black;
+}
+
+.danger-btn:hover {
+  background-color: #e0e0e0;
 }
 
 .board-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.2rem;
 }
 
 .board-item {
-  background: linear-gradient(135deg, #d3d3d3, #f5f3f3);
+  background: linear-gradient(135deg, #f0f0f0, #e2e2e2);
   padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease-in-out, box-shadow 0.3s;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .board-item:hover {
-  transform: scale(1.03);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transform: translateY(-4px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
 
 .fade-enter-active,
@@ -243,32 +366,5 @@ h2 {
 .fade-leave-to {
   opacity: 0;
   transform: translateY(10px);
-}
-.option-container {
-  display: flex;
-  gap: 25px; /* 버튼 사이 간격 설정 */
-}
-
-.option-but {
-  display: inline-flex; /* 글씨 크기에 맞게 자동 조정 */
-  align-items: center;
-  justify-content: center;
-  padding: 10px; /* 내부 여백 */
-  font-size: 16px; /* 글씨 크기 */
-  background-color: lightgray;
-  color: black;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  white-space: nowrap; /* 글씨가 길어져도 줄바꿈 방지 */
-}
-
-.option-but:hover {
-  background-color: #d3d3d3;
-}
-
-.selected {
-  background-color: blue !important; /* 선택된 버튼의 배경색 */
-  color: white;
 }
 </style>

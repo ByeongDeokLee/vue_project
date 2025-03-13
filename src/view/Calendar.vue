@@ -1,47 +1,53 @@
 <template>
-  <div class="calendar-container">
-    <div class="header">캘린더</div>
-    <div class="calendar">
-      <div class="week-days">
-        <div v-for="day in weekDays" :key="day" class="day-name">{{ day }}</div>
-      </div>
-      <div class="days">
-        <div v-for="n in startDay" :key="'empty-' + n" class="day empty"></div>
-        <div
-          v-for="day in daysInMonth"
-          :key="day"
-          class="day"
-          :class="{ selected: isSelected(day) }"
-          @click="selectDate(day)"
-        >
-          {{ day }}
+  <div class="modal-overlay" @click.self="close">
+    <div class="modal-content">
+      <div class="header">캘린더</div>
+      <div class="calendar">
+        <div class="week-days">
+          <div v-for="day in weekDays" :key="day" class="day-name">
+            {{ day }}
+          </div>
+        </div>
+        <div class="days">
+          <div
+            v-for="n in startDay"
+            :key="'empty-' + n"
+            class="day empty"
+          ></div>
+          <div
+            v-for="day in daysInMonth"
+            :key="day"
+            class="day"
+            :class="{ selected: isSelected(day) }"
+            @click="selectDate(day)"
+          >
+            {{ day }}
+          </div>
         </div>
       </div>
+      <div>
+        <button @click="BoardBtn">게시글 이동하기</button>
+        <button @click="closePopup">취소</button>
+      </div>
     </div>
-    <p v-if="selectedDate" class="selected-date">
-      Selected Date: {{ formattedSelectedDate }}
-    </p>
-    <button @click="BoardBtn">게시글 이동하기</button>
   </div>
 </template>
 
 <script>
 import { computed, onMounted } from "vue";
 import { usePostStore } from "@/js/postStore";
-import { useRouter } from "vue-router";
 
 export default {
   name: "CalendarPage",
-  setup() {
+  emits: ["login"],
+  setup(_, { emit }) {
     const today = new Date();
     const currentYear = today.getFullYear();
     const currentMonth = today.getMonth();
     const posts = computed(() => store.CalendarRePost);
 
     const store = usePostStore();
-    const router = useRouter();
     // 선택된 날짜를 배열로 관리
-    // const selectedDates = ref([]);
     const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
 
     // 현재 월의 총 일수
@@ -52,7 +58,6 @@ export default {
     // 날짜 선택/해제
     const selectDate = (day) => {
       const date = new Date(currentYear, currentMonth, day);
-
       if (store.CalendarRePost.length === 0) {
         store.CalendarRePost.push(date);
       } else if (store.CalendarRePost.length === 1) {
@@ -82,14 +87,17 @@ export default {
       );
     };
 
-    // 선택된 날짜 문자열로 표시
-    const formattedSelectedDates = computed(() =>
-      store.CalendarRePost.map((d) => d.toLocaleDateString()).join(", ")
-    );
-
     //게시글로 이동
     const BoardBtn = () => {
-      router.push({ path: "/board" });
+      console.log(
+        store.CalendarRePost.map((m) => m.toLocaleDateString("ko-KR"))
+      );
+      emit("close");
+    };
+
+    //팝업 종료
+    const closePopup = () => {
+      emit("close");
     };
 
     onMounted(() => {
@@ -100,25 +108,35 @@ export default {
       weekDays,
       daysInMonth,
       startDay,
-      // selectedDates,
       posts,
+      closePopup,
       BoardBtn,
       selectDate,
       isSelected,
-      formattedSelectedDates,
     };
   },
 };
 </script>
 
 <style scoped>
-.calendar-container {
-  max-width: 400px;
-  margin: auto;
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #fff;
   padding: 20px;
-  border: 1px solid #ccc;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .header {

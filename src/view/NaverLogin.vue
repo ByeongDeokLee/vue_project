@@ -76,7 +76,7 @@ export default {
       accessToken.value = "";
       email.value = "";
       nickname.value = "";
-      router.push("/");
+      router.push("/board");
     };
 
     // 최초 실행 시 Access Token 요청
