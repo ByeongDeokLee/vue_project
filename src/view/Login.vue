@@ -52,11 +52,11 @@ const state = Math.random().toString(36).substring(7);
 
 export default {
   name: "LoginPage",
-  emits: ["login"],
+  // emits: ["login"],
   /* setup(_, { emit }) 의미로는 props를 무시하는 의미
     해당 컴포넌트는 props를 받지만 사용하지 않는다 의미
   */
-  setup(_, { emit }) {
+  setup() {
     const formDate = ref({ pwd: "", email: "" });
     const errors = ref({ pwd: "", email: "" });
     const isLoggedIn = ref(false);
@@ -76,17 +76,22 @@ export default {
     const handleLogin = () => {
       if (!isValid.value) return;
 
-      const email = localStorage.getItem("email");
-      const pwd = localStorage.getItem("pwd");
-      if (email == formDate.value.email && pwd == formDate.value.pwd) {
-        isLoggedIn.value = true;
-        emit("login", formDate.value);
-        router.push({ path: "/board" });
-      } else {
-        alert("로그인 정보가 일치하지 않습니다.");
-        formDate.value.email = "";
-        formDate.value.pwd = "";
-      }
+      // const email = localStorage.getItem("email");
+      // const pwd = localStorage.getItem("pwd");
+      // if (email == formDate.value.email && pwd == formDate.value.pwd) {
+      isLoggedIn.value = true;
+
+      localStorage.setItem("email", formDate.value.email);
+      localStorage.setItem("pwd", formDate.value.pwd);
+
+      router.push({
+        path: "/board",
+      });
+      // } else {
+      //   alert("로그인 정보가 일치하지 않습니다.");
+      //   formDate.value.email = "";
+      //   formDate.value.pwd = "";
+      // }
     };
 
     //로그아웃
@@ -123,8 +128,8 @@ export default {
 
     //자동 로그인 확인
     onMounted(() => {
-      localStorage.setItem("email", "1@n.com");
-      localStorage.setItem("pwd", "1");
+      // localStorage.setItem("email", "1@n.com");
+      // localStorage.setItem("pwd", "1");
     });
     return {
       formDate,

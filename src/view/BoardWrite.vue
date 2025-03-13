@@ -1,47 +1,55 @@
 <template>
-  <div>
-    <form @submit.prevent="addPost" class="post-form">
-      <!-- <div>선택됨: {{ selected }}</div> -->
-      <select v-model="selected">
-        <option disabled value="">옵션을 선택하세요</option>
-        <option
-          v-for="option in selectOption.slice(1)"
-          :value="option"
-          :key="option"
-        >
-          {{ option.optionText }}
-        </option>
-      </select>
+  <teleport to="body">
+    <div class="modal-overlay" @click.self="closeModal">
+      <div class="modal-content">
+        <form @submit.prevent="addPost" class="post-form">
+          <select v-model="selected" required>
+            <option disabled value="">옵션을 선택하세요</option>
+            <option
+              v-for="option in selectOption.slice(1)"
+              :value="option"
+              :key="option"
+            >
+              {{ option.optionText }}
+            </option>
+          </select>
 
-      <input v-model="newTitle" type="text" placeholder="제목" required />
-      <textarea
-        v-model="newContent"
-        placeholder="게시글을 작성하세요"
-      ></textarea>
-      <button type="submit">작성</button>
-    </form>
-  </div>
+          <input v-model="newTitle" type="text" placeholder="제목" required />
+
+          <textarea
+            v-model="newContent"
+            placeholder="게시글을 작성하세요"
+          ></textarea>
+
+          <!-- 작성 날짜 표시 -->
+          <input type="text" :value="today" readonly />
+
+          <button type="submit">작성</button>
+          <button type="button" @click="closeModal">닫기</button>
+        </form>
+      </div>
+    </div>
+  </teleport>
 </template>
 
 <script>
 import { usePostStore } from "@/js/postStore";
-import { ref, computed, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { ref, computed } from "vue";
 
 export default {
-  name: "BoardWrite",
-  setup() {
+  name: "BoardWriteModal",
+  emits: ["close"],
+  setup(_, { emit }) {
+    const store = usePostStore();
     const newTitle = ref("");
     const newContent = ref("");
-    const posts = computed(() => store.posts);
     const selected = ref("");
-    const router = useRouter();
     const selectOption = computed(() => store.CommunityOption);
+    const posts = computed(() => store.posts);
 
-    const today = new Date();
+    // 오늘 날짜 생성
+    const today = new Date().toLocaleDateString("ko-KR");
 
-    const store = usePostStore();
-    // 게시물 추가
     const addPost = () => {
       if (!newTitle.value.trim() || !newContent.value.trim()) {
         alert("제목과 내용을 입력하세요.");
@@ -57,33 +65,56 @@ export default {
         id: posts.value.length + 1,
         title: newTitle.value,
         content: newContent.value,
-        checked: false, // 체크 여부 추가
+        checked: false,
         optionText: selected.value.optionText,
         optionId: selected.value.optionId,
-        WriteDate: today.toLocaleDateString("ko-KR"),
+        writeDate: today, // 작성 날짜 저장
       };
 
       store.posts.push(newPost);
 
-      newTitle.value = "";
-      newContent.value = "";
-      router.push(`/board`);
+      emit("close"); // 모달 닫기
     };
 
-    onMounted(() => {
-      // console.log("\n\n today \n\n\n", today);
-    });
+    const closeModal = () => {
+      emit("close");
+    };
 
     return {
-      posts,
       newTitle,
       newContent,
       selected,
       selectOption,
+      today,
       addPost,
+      closeModal,
     };
   },
 };
 </script>
 
-<style></style>
+<style scoped>
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+}
+
+button {
+  margin-top: 10px;
+}
+</style>

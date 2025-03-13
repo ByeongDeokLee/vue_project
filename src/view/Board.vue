@@ -16,7 +16,12 @@
       </div>
       <button @click="boardListWrite" class="delete-btn">게시글 작성</button>
       <button @click="deleteCheckedPosts" class="delete-btn">선택 삭제</button>
-      <LoginPopup v-if="showModal" :user="user" @close="handleClose" />
+      <LoginPopup
+        v-if="showLoginModal"
+        :user="user"
+        @close="handleLoginClose"
+      />
+      <BoardWrite v-if="showBoardWriModal" @close="handleBoardWriClose" />
       <transition-group
         v-if="!searchYn"
         name="fade"
@@ -27,7 +32,7 @@
           v-for="Category in CategoryList"
           :key="Category.id"
           class="board-item"
-          @click="boardIndexPage(post)"
+          @click="boardIndexPage(Category.id)"
         >
           <h3>{{ Category.title }}</h3>
           <p>{{ Category.content }}</p>
@@ -43,14 +48,15 @@ import { usePostStore } from "@/js/postStore";
 import { onMounted, computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import LoginPopup from "@/view/LoginPopup.vue";
+import BoardWrite from "@/view/BoardWrite.vue";
 
 export default {
   name: "BoardPage",
-  props: ["user"],
   components: {
     LoginPopup,
+    BoardWrite,
   },
-  setup(props, { emit }) {
+  setup(_, { emit }) {
     const router = useRouter();
     const posts = computed(() => store.posts);
     const selectOption = computed(() => store.CommunityOption);
@@ -60,21 +66,25 @@ export default {
     const searchKeyword = ref("");
     const searchYn = ref(false);
 
-    const showModal = ref(false);
+    const showLoginModal = ref(false);
+    const showBoardWriModal = ref(false);
+
+    const LoginDataForm = ref({});
 
     const CalendarList = computed(() => store.CalendarRePost);
 
     const store = usePostStore();
 
     const boardListWrite = () => {
-      if (!props.user) {
+      console.log(!LoginDataForm.value);
+      if (!LoginDataForm.value) {
         // alert("로그인 후 이용 가능합니다.");
         // router.push(`/LoginPoup`);
-        showModal.value = true;
+        showLoginModal.value = true;
         return;
       }
-
-      router.push(`/boardWrite`);
+      showBoardWriModal.value = true;
+      // router.push(`/boardWrite`);
     };
 
     // 선택된 게시물 삭제
@@ -84,9 +94,14 @@ export default {
     };
 
     //로그인 팝업 닫기
-    const handleClose = (data) => {
-      console.log(data); // 자식에서 전달된 데이터 (LoginFrom)
-      showModal.value = false; // 모달 닫기
+    const handleLoginClose = (data) => {
+      LoginDataForm.value = data;
+      showLoginModal.value = false; // 모달 닫기
+    };
+
+    //게시글 작성 팝업 닫기
+    const handleBoardWriClose = () => {
+      showBoardWriModal.value = false; // 모달 닫기
     };
 
     //카테고리
@@ -117,17 +132,18 @@ export default {
 
     // 상세페이지 이동
     const boardIndexPage = (post) => {
+      console.log(post);
       emit("login", post);
-      router.push(`/board/${post.id}`);
+      router.push(`/board/${post}`);
     };
 
     // 초기 게시물 로딩
     onMounted(() => {
       CategoryList.value = posts.value;
-      console.log(
-        "날짜",
-        CalendarList.value.map((d) => d.toLocaleDateString("ko-KR"))
-      );
+      LoginDataForm.value.email = localStorage.getItem("email");
+      LoginDataForm.value.pwd = localStorage.getItem("pwd");
+
+      console.log(CategoryList.value);
     });
 
     return {
@@ -136,8 +152,10 @@ export default {
       CategoryList,
       searchKeyword,
       searchYn,
-      showModal,
-      handleClose,
+      showLoginModal,
+      showBoardWriModal,
+      handleLoginClose,
+      handleBoardWriClose,
       selCategoryBut,
       CalendarList,
       boardIndexPage,
