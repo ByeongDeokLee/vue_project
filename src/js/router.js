@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Login from "../view/Login.vue";
+//import Login from "../view/Login.vue";
 import Board from "../view/Board.vue";
 import DetailPage from "../view/DetailPage.vue";
 import EditPage from "../view/EditPage.vue";
@@ -11,9 +11,9 @@ import Calendar from "../view/Calendar.vue";
 import MemberJoin from "../view/memberJoin.vue";
 
 const routes = [
-  { path: "/", component: Login },
+  // { path: "/", component: Login },
   {
-    path: "/board",
+    path: "/",
     component: Board,
     props: true,
   },

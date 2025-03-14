@@ -56,4 +56,5 @@ Vue 버전 : Vue 3 기본
 네이버 로그인 오픈 API Client ID = nPQvqYv2ZtubwhQzisDn
 네이버 로그인 오픈 API Client Secret = lVR8yLXry2
 
---------------내위치 찾아서 날씨 뿌리기---
+-----------네이버 로그인 cor에러 ----
+npm install http-proxy-middleware --save -- 설치

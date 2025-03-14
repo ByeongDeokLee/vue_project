@@ -92,12 +92,12 @@ export default {
       console.log(
         store.CalendarRePost.map((m) => m.toLocaleDateString("ko-KR"))
       );
-      emit("close");
+      emit("close", "YES");
     };
 
     //팝업 종료
     const closePopup = () => {
-      emit("close");
+      emit("close", "NO");
     };
 
     onMounted(() => {

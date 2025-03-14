@@ -14,7 +14,7 @@ import axios from "axios";
 
 const clientId = "nPQvqYv2ZtubwhQzisDn";
 const clientSecret = "lVR8yLXry2";
-const redirectUri = "http://localhost:8080/naverlogin"; // 콜백 URL
+// const redirectUri = "http://localhost:8080/naverlogin"; // 콜백URL
 
 export default {
   setup() {
@@ -28,29 +28,47 @@ export default {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get("code"); // 로그인 성공 시 네이버가 넘겨주는 인증 코드
     };
+    // URL에서 'state' 추출
+    const getAuthStateFromUrl = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get("state"); // 로그인 성공 시 네이버가 넘겨주는 인증 코드
+    };
 
     // Access Token 요청
-    const getAccessToken = async (code) => {
+    const getAccessToken = async (code, state) => {
       try {
-        /*       const url = `http://nid.naver.com/oauth2.0/token?grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&redirect_uri=${encodeURIComponent(
-          redirectUri
-        )}&code=${code}&state=RANDOM_STRING`;
+        const url =
+          "/api/oauth2.0/token?" +
+          "grant_type=code" +
+          "&client_id=" +
+          clientId +
+          "&client_secret=" +
+          clientSecret +
+          "&code=" +
+          code +
+          "&state=" +
+          state;
+        // const url = `/oauth2.0/token?grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&state=${state}`;
 
-        const { data } = await axios.get(url);
-        accessToken.value = data.access_token; */
+        let config = {
+          headers: {
+            Host: "openapi.naver.com",
+            "User-Agent": "curl/7.49.1",
+            Accept: "*/*",
+            "X-Naver-Client-Id": "7ra3GJA-------ivYe9F",
+            "X-Naver-Client-Secret": "4yq-------3W",
+          },
+        };
 
-        const response = await axios.post(
-          "http://localhost:8080/api/naver/token",
-          {
-            grant_type: "authorization_code",
-            client_id: clientId,
-            client_secret: clientSecret,
-            redirect_uri: redirectUri,
-            code: code,
-          }
-        );
+        console.log(url);
 
-        accessToken.value = response.access_token;
+        const { data } = await axios.get(url, config).then((response) => {
+          console.log(response);
+        });
+        // const { data } = await axios.get(url);
+        accessToken.value = data.access_token;
+
+        // accessToken.value = response.access_token;
         getUserInfo();
       } catch (error) {
         console.error("Error fetching access token:", error);
@@ -76,17 +94,19 @@ export default {
       accessToken.value = "";
       email.value = "";
       nickname.value = "";
-      router.push("/board");
+      router.push("/");
     };
 
     // 최초 실행 시 Access Token 요청
     onMounted(() => {
       const code = getAuthCodeFromUrl();
+      const start = getAuthStateFromUrl();
       if (code) {
-        getAccessToken(code);
+        getAccessToken(code, start);
       } else {
         console.error("Authorization code not found in URL");
       }
+      // getUserInfo();
     });
 
     return { email, nickname, logout };

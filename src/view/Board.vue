@@ -63,7 +63,8 @@ import Calendar from "@/view/Calendar.vue";
 
 // Naver 로그인 초기화
 const clientId = "nPQvqYv2ZtubwhQzisDn"; // 여기에 네이버 개발자 센터에서 발급받은 클라이언트 ID를 넣어야 합니다.
-const redirectUri = encodeURIComponent("http://localhost:8080/naverLogin"); // 인코딩 필수!
+const redirectUri = "http://localhost:8080/naverLogin"; // 인코딩 필수!
+// const redirectUri = encodeURIComponent("http://localhost:8080/naverLogin"); // 인코딩 필수!
 const state = Math.random().toString(36).substring(7);
 
 export default {
@@ -110,36 +111,36 @@ export default {
 
     //로그인 팝업 닫기
     const handleLoginClose = (data) => {
-      LoginDataForm.value = data;
+      if (data) {
+        LoginDataForm.value = data;
+      }
       showLoginModal.value = false; // 모달 닫기
     };
 
     //게시글 작성 팝업 닫기
     const handleBoardWriClose = () => {
+      console.log("handleBoardWriClose");
       showBoardWriModal.value = false; // 모달 닫기
     };
 
     //캘린더 팝업 닫기
-    const handleCalendarClose = () => {
+    const handleCalendarClose = (data) => {
+      if (data == "NO") {
+        showCalendarModel.value = false;
+        return;
+      }
+
       CategoryList.value = [];
 
       for (let i = 0; i < store.CalendarRePost.length; i++) {
-        for (let j = 0; j < CategoryList.value.length; j++) {
-          const calendarDate = store.CalendarRePost[i];
-          const categoryDate = CategoryList[j].value.writeDate;
+        for (let j = 0; j < posts.value.length; j++) {
+          const calendarDate =
+            store.CalendarRePost[i].toLocaleDateString("ko-KR");
+          const categoryDate = posts.value[j].writeDate;
 
           // 날짜 비교 (year, month, day 각각 비교)
-          if (
-            calendarDate.year === new Date(categoryDate).getFullYear() &&
-            calendarDate.month === new Date(categoryDate).getMonth() &&
-            calendarDate.day === new Date(categoryDate).getDate()
-          ) {
-            // 중복 방지: 이미 추가된 값인지 확인
-            if (
-              !CategoryList.value.some((item) => item === CategoryList[j].value)
-            ) {
-              CategoryList.value.push(CategoryList[j].value);
-            }
+          if (calendarDate == categoryDate) {
+            CategoryList.value.push(posts.value[j]);
           }
         }
       }
@@ -338,7 +339,7 @@ h2 {
 }
 
 .board-list {
-  display: grid;
+  /* display: grid; */
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 1.2rem;
 }

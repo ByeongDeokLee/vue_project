@@ -2,11 +2,9 @@ const { defineConfig } = require("@vue/cli-service");
 module.exports = {
   devServer: {
     proxy: {
-      "/naver-api": {
-        target: "https://nid.naver.com",
+      "/api": {
+        target: "https://openapi.naver.com/",
         changeOrigin: true,
-        pathRewrite: { "^/naver-api": "" },
-        secure: false,
       },
     },
   },
