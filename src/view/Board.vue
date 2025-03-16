@@ -41,9 +41,9 @@
     <transition-group v-if="!searchYn" name="fade" tag="div" class="board-list">
       <div
         v-for="Category in CategoryList"
-        :key="Category.id"
+        :key="Category"
         class="board-item"
-        @click="boardIndexPage(Category.id)"
+        @click="boardIndexPage(Category)"
       >
         <h3>{{ Category.title }}</h3>
         <p>{{ Category.content }}</p>
@@ -95,11 +95,12 @@ export default {
 
     const store = usePostStore();
 
+    //게시물 작성
     const boardListWrite = () => {
-      if (!LoginDataForm.value.username || !LoginDataForm.value.password) {
-        showLoginModal.value = true;
-        return;
-      }
+      // if (!LoginDataForm.value.username || !LoginDataForm.value.password) {
+      //   showLoginModal.value = true;
+      //   return;
+      // }
       showBoardWriModal.value = true;
     };
 
@@ -182,9 +183,11 @@ export default {
 
     // 상세페이지 이동
     const boardIndexPage = (post) => {
+      console.log(post);
       emit("login", post);
       router.push(`/board/${post}`);
     };
+
     // 뉴스 페이지
     const NewPage = () => {
       router.push({ path: "/newsPage" });
@@ -203,6 +206,7 @@ export default {
     // 초기 게시물 로딩
     onMounted(() => {
       CategoryList.value = posts.value;
+      selCategoryBut.value = selectOption.value[0].optionId;
     });
 
     return {

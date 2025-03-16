@@ -24,6 +24,15 @@
           <!-- 작성 날짜 표시 -->
           <input type="text" :value="today" readonly />
 
+          <!-- 이미지 업로드 -->
+          <input type="file" @change="handleImageUpload" accept="image/*" />
+
+          <!-- 이미지 미리보기 -->
+          <div v-if="imagePreview">
+            <p>이미지 미리보기:</p>
+            <img :src="imagePreview" alt="미리보기" class="preview-img" />
+          </div>
+
           <button type="submit">작성</button>
           <button type="button" @click="closeModal">닫기</button>
         </form>
@@ -46,15 +55,17 @@ export default {
     const selected = ref("");
     const selectOption = computed(() => store.CommunityOption);
     const posts = computed(() => store.posts);
+    const imageFile = ref(null);
+    const imagePreview = ref("");
 
     // 오늘 날짜 생성
     const today = new Date().toLocaleDateString("ko-KR");
 
     const addPost = () => {
-      if (!newTitle.value.trim() || !newContent.value.trim()) {
-        alert("제목과 내용을 입력하세요.");
-        return;
-      }
+      // if (!newTitle.value || !newContent.value || !imageFile.value) {
+      //   alert("제목, 내용, 이미지를 모두 입력하세요.");
+      //   return;
+      // }
 
       if (!selected.value) {
         alert("옵션을 선택하세요");
@@ -80,12 +91,25 @@ export default {
       emit("close");
     };
 
+    // 이미지 업로드 핸들러
+    const handleImageUpload = (event) => {
+      const file = event.target.files[0];
+      if (file && file.type.startsWith("image/")) {
+        imageFile.value = file;
+        imagePreview.value = URL.createObjectURL(file); // 로컬 이미지 미리보기
+      } else {
+        alert("이미지 파일만 업로드 가능합니다.");
+      }
+    };
+
     return {
       newTitle,
       newContent,
       selected,
       selectOption,
       today,
+      imagePreview,
+      handleImageUpload,
       addPost,
       closeModal,
     };
@@ -116,5 +140,12 @@ export default {
 
 button {
   margin-top: 10px;
+}
+.preview-img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover; /* 비율 유지하면서 영역에 맞게 잘라줌 */
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 </style>

@@ -28,27 +28,19 @@ export default {
         script.defer = true;
         script.onload = resolve();
 
-        // script.onload = () => {
-        //   console.log("네이버 지도 API 스크립트 로드 완료");
-        //   resolve();
-        // };
-        // script.onerror = () => {
-        //   console.error("네이버 지도 API 스크립트 로드 실패");
-        // };
         document.head.appendChild(script);
       });
     };
 
     // 지도 초기화
     const initMap = () => {
-      console.log("8");
       if (!window.naver || !window.naver.maps) return;
-      console.log("9");
 
-      new naver.maps.Map(mapRef.value, {
-        center: new naver.maps.LatLng(37.5670135, 126.978374),
-        zoom: 10,
-      });
+      // new window.naver.maps.Map(mapRef.value, {
+      //   center: new naver.maps.LatLng(37.5670135, 126.978374),
+      //   zoom: 10,
+      // });
+      new window.naver.maps.Map(mapRef.value);
     };
 
     onMounted(async () => {
