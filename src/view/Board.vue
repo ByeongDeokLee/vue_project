@@ -1,12 +1,12 @@
 <template>
   <div class="board-container">
     <h2>게시판</h2>
-
     <div class="button-group">
       <button @click="CalendarBtn" class="action-btn">캘린더 보기</button>
       <button @click="NewPage" class="action-btn">뉴스 페이지 이동</button>
       <button @click="naverLoginBtn" class="action-btn">네이버 로그인</button>
       <button @click="naverMapBtn" class="action-btn">네이버 지도</button>
+      <NaverMap v-if="showMapModal" @close="handleMapClose" />
     </div>
 
     <Calendar v-if="showCalendarModel" @close="handleCalendarClose" />
@@ -60,6 +60,7 @@ import { useRouter } from "vue-router";
 import LoginPopup from "@/view/LoginPopup.vue";
 import BoardWrite from "@/view/BoardWrite.vue";
 import Calendar from "@/view/Calendar.vue";
+import NaverMap from "@/view/NaverMap.vue";
 
 // Naver 로그인 초기화
 const clientId = "nPQvqYv2ZtubwhQzisDn"; // 여기에 네이버 개발자 센터에서 발급받은 클라이언트 ID를 넣어야 합니다.
@@ -73,6 +74,7 @@ export default {
     LoginPopup,
     BoardWrite,
     Calendar,
+    NaverMap,
   },
   setup(_, { emit }) {
     const router = useRouter();
@@ -88,7 +90,7 @@ export default {
     const showLoginModal = ref(false);
     const showBoardWriModal = ref(false);
     const showCalendarModel = ref(false);
-
+    const showMapModal = ref(false);
     const LoginDataForm = ref({});
 
     const CalendarList = computed(() => store.CalendarRePost);
@@ -149,6 +151,11 @@ export default {
       showCalendarModel.value = false; // 모달 닫기
     };
 
+    //네이버 지도
+    const handleMapClose = () => {
+      showMapModal.value = false;
+    };
+
     //카테고리
     const selectOptionBut = (option) => {
       if (!posts.value.length) {
@@ -200,7 +207,8 @@ export default {
 
     //네이버 지도
     const naverMapBtn = () => {
-      router.push({ path: "/naverMap" });
+      // router.push({ path: "/naverMap" });
+      showMapModal.value = true;
     };
 
     // 초기 게시물 로딩
@@ -225,6 +233,8 @@ export default {
       naverMapBtn,
       NewPage,
       CalendarList,
+      showMapModal,
+      handleMapClose,
       CalendarBtn,
       handleCalendarClose,
       boardIndexPage,

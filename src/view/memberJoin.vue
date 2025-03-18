@@ -1,6 +1,12 @@
 <template>
   <div class="signup-container">
     <h2>회원가입</h2>
+
+    <div>
+      <v-btn dark depressed @click="getCurrentPosition()">위치 좌표 확인</v-btn>
+      <div>{{ isPositionReady ? "yes" : "no" }}</div>
+    </div>
+
     <form @submit.prevent="handleSubmit">
       <div class="form-group">
         <label for="email">이메일</label>
@@ -42,7 +48,7 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { reactive, ref } from "vue";
 export default {
   name: "memberJoinPage",
   setup() {
@@ -55,6 +61,35 @@ export default {
     });
 
     const errorMessage = ref("");
+
+    const positionObj = reactive({ latitude: null, longitude: null });
+    const isPositionReady = ref(false);
+
+    const getCurrentPosition = () => {
+      if (!navigator.geolocation) {
+        setAlert("위치 정보를 찾을 수 없습니다.1");
+      } else {
+        navigator.geolocation.getCurrentPosition(
+          getPositionValue(),
+          geolocationError()
+        );
+      }
+    };
+
+    const getPositionValue = (val) => {
+      positionObj.value.latitude = val.coords.latitude;
+      positionObj.value.longitude = val.coords.longitude;
+      isPositionReady.value = true;
+      setAlert("주소 확인 완료");
+    };
+
+    const geolocationError = () => {
+      setAlert("위치 정보를 찾을 수 없습니다.2");
+    };
+
+    const setAlert = (text) => {
+      alert(text);
+    };
 
     const handleSubmit = () => {
       if (form.value.password !== form.value.confirmPassword) {
@@ -69,7 +104,13 @@ export default {
       console.log("회원가입 성공", form.value);
       errorMessage.value = "";
     };
-    return { form, handleSubmit };
+    return {
+      form,
+      positionObj,
+      isPositionReady,
+      getCurrentPosition,
+      handleSubmit,
+    };
   },
 };
 </script>

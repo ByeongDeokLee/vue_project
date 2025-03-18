@@ -56,5 +56,5 @@ Vue 버전 : Vue 3 기본
 네이버 로그인 오픈 API Client ID = nPQvqYv2ZtubwhQzisDn
 네이버 로그인 오픈 API Client Secret = lVR8yLXry2
 
------------네이버 로그인 cor에러 ----
-npm install http-proxy-middleware --save -- 설치
+-------------------내 위치값 라이브러리-----
+npm install --save vue-geolocation-api
