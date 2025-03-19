@@ -9,12 +9,35 @@
           class="naver_close"
         />
       </div>
-      <naver-map style="width: 400px; height: 400px" :map-options="mapOptions">
-        <naver-marker>
-          <div class="marker">
-            <!-- <img :src="clinic.imageUrl" /> -->
-          </div>
-        </naver-marker>
+
+      <!-- 🟢 사이드바 -->
+      <div class="sidebar" :class="{ open: sidebarOpen }">
+        <button class="close-btn" @click="toggleSidebar">닫기</button>
+        <h2>지도 설정</h2>
+        <ul>
+          <li @click="setMode('all')">📌 전체 보기</li>
+          <li @click="setMode('myLocation')">📍 내 위치</li>
+          <li @click="setMode('favorites')">⭐ 즐겨찾기</li>
+        </ul>
+      </div>
+
+      <!-- 네이버 지도 -->
+      <naver-map
+        style="width: 400px; height: 400px"
+        :map-options="mapOptions"
+        @click="onMapClick($event)"
+      >
+        <div v-if="markerref">
+          <naver-marker
+            v-for="marker in markerPosition"
+            :key="marker"
+            :latitude="marker.lat"
+            :longitude="marker.lng"
+            @load="onMarkerLoaded"
+            @click="onMarkerClicked"
+          >
+          </naver-marker>
+        </div>
       </naver-map>
     </div>
   </div>
@@ -23,7 +46,7 @@
 <script>
 /* eslint-disable no-undef */
 import { NaverMap, NaverMarker } from "vue3-naver-maps";
-import { onMounted } from "vue";
+import { ref, onMounted } from "vue";
 
 export default {
   name: "NaverMapComponent",
@@ -33,97 +56,69 @@ export default {
   },
   emits: ["close"],
   setup(_, { emit }) {
-    onMounted(() => {
-      // 지도, 마커, 인포윈도우 초기화
-      const cityhall = new naver.maps.LatLng(37.5666805, 126.9784147);
-      const map = new naver.maps.Map("map", {
-        center: cityhall.destinationPoint(0, 500),
-        zoom: 15,
-      });
+    const markerref = ref(true);
+    // 기본 마커 위치
+    const markerPosition = ref([]);
+    // const markerPosition = ref({
+    //   lat: 37.3595704,
+    //   lng: 127.105399,
+    // });
 
-      const marker = new naver.maps.Marker({
-        map: map,
-        position: cityhall,
-      });
-
-      const contentString = `
-        <div class="iw_inner">
-          <h3>서울특별시청</h3>
-          <p>서울특별시 중구 태평로1가 31 | 서울특별시 중구 세종대로 110 서울특별시청<br />
-             <img src="/img/example/hi-seoul.jpg" width="55" height="55" alt="서울시청" class="thumb" /><br />
-             02-120 | 공공,사회기관 &gt; 특별,광역시청<br />
-             <a href="http://www.seoul.go.kr" target="_blank">www.seoul.go.kr/</a>
-          </p>
-        </div>
-      `;
-
-      const infowindow = new naver.maps.InfoWindow({
-        content: contentString,
-      });
-
-      naver.maps.Event.addListener(marker, "click", function () {
-        if (infowindow.getMap()) {
-          infowindow.close();
-        } else {
-          infowindow.open(map, marker);
-        }
-      });
-
-      infowindow.open(map, marker);
-    });
-
-    const NaverMapClose = () => {
-      emit("close");
-    };
-
+    // 지도 옵션 설정
     const mapOptions = {
-      latitude: 37.51347, // 지도 중앙 위도
-      longitude: 127.041722, // 지도 중앙 경도
-      zoom: 13,
+      latitude: markerPosition.value.lat, // 초기 지도 중앙 위치
+      longitude: markerPosition.value.lng,
+      zoom: 15,
     };
-    /*  const props = defineProps({
-      id: {
-        type: String,
-        required: true,
-      },
-      imageUrl: {
-        type: String,
-        required: true,
-      },
-      lat: {
-        type: Number,
-        required: true,
-      },
-      lng: {
-        type: Number,
-        required: true,
-      },
-    });
 
-    const marker = ref(null);
+    //마커 로드
+    const onMarkerLoaded = (vue) => {
+      console.log("onMarkerLoaded==========>", vue);
+    };
 
-    watch(
-      () => [marker.value],
-      () => {
-        if (!marker.value) return;
+    //마커 이벤트 핸들링
+    const onMarkerClicked = (event) => {
+      console.log("onMarkerClicked==========>", event);
+      markerref.value = false;
+      // onMarkerLoaded(event);
+    };
 
-        marker.value.setIcon({
-          content: `<div class="marker">
-        <img src="${props.imageUrl}" />
-      </div>`,
-        });
+    // 지도 클릭 시 마커 위치 변경
+    const onMapClick = (event) => {
+      console.log("dsdasda", !markerref.value);
+      if (!markerref.value) {
+        console.log("마커를 보여주어");
+        markerref.value = true;
       }
-    );
-    const mapOptions = {
-      latitude: 37.51347, // 지도 중앙 위도
-      longitude: 127.041722, // 지도 중앙 경도
-      zoom: 13,
+
+      if (event.latlng) {
+        markerPosition.value.push({
+          lat: event.latlng._lat,
+          lng: event.latlng._lng,
+        });
+        console.log("\n\n 마커 \n\n", markerPosition.value);
+      }
     };
+
+    onMounted(() => {
+      // markerPosition.value ( )
+      markerref.value = false;
+      markerPosition.value = [];
+    });
 
     const NaverMapClose = () => {
       emit("close");
-    }; */
-    return { mapOptions, NaverMapClose };
+    };
+
+    return {
+      markerPosition,
+      mapOptions,
+      onMapClick,
+      NaverMapClose,
+      onMarkerLoaded,
+      onMarkerClicked,
+      markerref,
+    };
   },
 };
 </script>
@@ -145,7 +140,7 @@ export default {
   background: #fff;
   padding: 20px;
   border-radius: 8px;
-  width: 300px;
+  width: 400px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
@@ -153,6 +148,47 @@ export default {
   width: 100%;
   height: 400px;
 }
+
+/* 사이드 바 */
+.open-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: #0070f3;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 18px;
+  border-radius: 5px;
+}
+
+.close-btn {
+  width: 100%;
+  padding: 10px;
+  background: red;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+/* 🟢 리스트 스타일 */
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #ddd;
+}
+
+.sidebar ul li:hover {
+  background: #f5f5f5;
+}
+
 .naver_close {
   object-fit: contain;
   width: 30px;
