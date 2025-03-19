@@ -21,23 +21,47 @@
         </ul>
       </div>
 
+      <!-- 🟢 사이드바 열기 버튼 -->
+      <button class="open-btn" v-if="!sidebarOpen" @click="toggleSidebar">
+        ☰
+      </button>
+
       <!-- 네이버 지도 -->
       <naver-map
         style="width: 400px; height: 400px"
         :map-options="mapOptions"
         @click="onMapClick($event)"
       >
-        <div v-if="markerref">
-          <naver-marker
-            v-for="marker in markerPosition"
-            :key="marker"
-            :latitude="marker.lat"
-            :longitude="marker.lng"
-            @load="onMarkerLoaded"
-            @click="onMarkerClicked"
-          >
-          </naver-marker>
-        </div>
+        <naver-marker
+          v-for="marker in markerPosition"
+          :key="marker"
+          :latitude="marker.lat"
+          :longitude="marker.lng"
+          @load="onMarkerLoaded"
+          @click="onMarkerClicked"
+        >
+        </naver-marker>
+        <naver-info-window
+          v-if="isInfoWindowOpen"
+          :latitude="markerPosition[0].lat"
+          :longitude="markerPosition[0].lng"
+          :max-width="140"
+          :border-width="5"
+          :border-color="'#2db400'"
+          :background-color="'#eee'"
+          :anchor-size="anchorSize"
+          :anchor-skew="true"
+          :anchor-color="'#eee'"
+        >
+          <div class="info-window">
+            <div style="font-weight: bold; margin-bottom: 5px">
+              {{ mapOptions.FNAME }}
+            </div>
+            <div style="font-size: 13px">
+              {{ mapOptions.ANAME }}
+            </div>
+          </div>
+        </naver-info-window>
       </naver-map>
     </div>
   </div>
@@ -46,7 +70,7 @@
 <script>
 /* eslint-disable no-undef */
 import { NaverMap, NaverMarker } from "vue3-naver-maps";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 
 export default {
   name: "NaverMapComponent",
@@ -56,20 +80,19 @@ export default {
   },
   emits: ["close"],
   setup(_, { emit }) {
-    const markerref = ref(true);
-    // 기본 마커 위치
+    // 기본 마커
     const markerPosition = ref([]);
-    // const markerPosition = ref({
-    //   lat: 37.3595704,
-    //   lng: 127.105399,
-    // });
+    const isInfoWindowOpen = ref(false);
+    const sidebarOpen = ref(false); // 사이드바 열림/닫힘 상태
+    const activeMode = ref("all"); // 현재 선택된 모드
 
     // 지도 옵션 설정
-    const mapOptions = {
-      latitude: markerPosition.value.lat, // 초기 지도 중앙 위치
-      longitude: markerPosition.value.lng,
+    const mapOptions = computed(() => ({
+      position: (37.3595704, 127.105399),
       zoom: 15,
-    };
+      FNAME: "화장실 이름",
+      ANAME: "화장실 위치",
+    }));
 
     //마커 로드
     const onMarkerLoaded = (vue) => {
@@ -79,32 +102,42 @@ export default {
     //마커 이벤트 핸들링
     const onMarkerClicked = (event) => {
       console.log("onMarkerClicked==========>", event);
-      markerref.value = false;
-      // onMarkerLoaded(event);
+      isInfoWindowOpen.value = !isInfoWindowOpen.value;
     };
 
     // 지도 클릭 시 마커 위치 변경
     const onMapClick = (event) => {
-      console.log("dsdasda", !markerref.value);
-      if (!markerref.value) {
-        console.log("마커를 보여주어");
-        markerref.value = true;
-      }
-
       if (event.latlng) {
         markerPosition.value.push({
           lat: event.latlng._lat,
           lng: event.latlng._lng,
         });
-        console.log("\n\n 마커 \n\n", markerPosition.value);
       }
     };
 
+    // 모드 변경
+    const setMode = (mode) => {
+      activeMode.value = mode;
+
+      if (mode === "myLocation") {
+        navigator.geolocation.getCurrentPosition((pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          markerPosition.value.push({ lat, lng, type: "default" });
+        });
+      }
+    };
+
+    // 사이드바 열고 닫기
+    const toggleSidebar = () => {
+      sidebarOpen.value = !sidebarOpen.value;
+    };
+
     onMounted(() => {
-      // markerPosition.value ( )
-      markerref.value = false;
       markerPosition.value = [];
     });
+
+    const anchorSize = ref({ width: 30, height: 30 });
 
     const NaverMapClose = () => {
       emit("close");
@@ -113,11 +146,16 @@ export default {
     return {
       markerPosition,
       mapOptions,
+      isInfoWindowOpen,
+      sidebarOpen,
+      activeMode,
+      setMode,
+      toggleSidebar,
       onMapClick,
       NaverMapClose,
       onMarkerLoaded,
       onMarkerClicked,
-      markerref,
+      anchorSize,
     };
   },
 };
@@ -193,5 +231,10 @@ export default {
   object-fit: contain;
   width: 30px;
   height: 30px;
+}
+
+.info_window {
+  padding: 10px;
+  font-size: 14px;
 }
 </style>
