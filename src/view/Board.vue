@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div class="board-container">
     <h2>게시판</h2>
@@ -53,7 +54,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+/* eslint-disable no-undef */
 import { usePostStore } from "@/js/postStore";
 import { onMounted, computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -68,182 +70,142 @@ const redirectUri = "http://localhost:8080/naverLogin"; // 인코딩 필수!
 // const redirectUri = encodeURIComponent("http://localhost:8080/naverLogin"); // 인코딩 필수!
 const state = Math.random().toString(36).substring(7);
 
-export default {
-  name: "BoardPage",
-  components: {
-    LoginPopup,
-    BoardWrite,
-    Calendar,
-    NaverMap,
-  },
-  setup(_, { emit }) {
-    const router = useRouter();
-    const posts = computed(() => store.posts);
-    const selectOption = computed(() => store.CommunityOption);
-    const selCategoryBut = ref(null);
+const emit = defineEmits(["close"]);
 
-    const CategoryList = ref([]);
-    const searchKeyword = ref("");
-    const searchYn = ref(false);
+const router = useRouter();
+const posts = computed(() => store.posts);
+const selectOption = computed(() => store.CommunityOption);
+const selCategoryBut = ref(null);
 
-    //페이지 노출 조건 변수
-    const showLoginModal = ref(false);
-    const showBoardWriModal = ref(false);
-    const showCalendarModel = ref(false);
-    const showMapModal = ref(false);
-    const LoginDataForm = ref({});
+const CategoryList = ref([]);
+const searchKeyword = ref("");
+const searchYn = ref(false);
 
-    const CalendarList = computed(() => store.CalendarRePost);
+//페이지 노출 조건 변수
+const showLoginModal = ref(false);
+const showBoardWriModal = ref(false);
+const showCalendarModel = ref(false);
+const showMapModal = ref(false);
+const LoginDataForm = ref({});
 
-    const store = usePostStore();
+// const CalendarList = computed(() => store.CalendarRePost);
 
-    //게시물 작성
-    const boardListWrite = () => {
-      // if (!LoginDataForm.value.username || !LoginDataForm.value.password) {
-      //   showLoginModal.value = true;
-      //   return;
-      // }
-      showBoardWriModal.value = true;
-    };
+const store = usePostStore();
 
-    // 선택된 게시물 삭제
-    const deleteCheckedPosts = () => {
-      console.log(store.posts);
-      CategoryList.value = CategoryList.value.filter((post) => !post.checked);
-    };
-
-    //로그인 팝업 닫기
-    const handleLoginClose = (data) => {
-      if (data) {
-        LoginDataForm.value = data;
-      }
-      showLoginModal.value = false; // 모달 닫기
-    };
-
-    //게시글 작성 팝업 닫기
-    const handleBoardWriClose = () => {
-      console.log("handleBoardWriClose");
-      showBoardWriModal.value = false; // 모달 닫기
-    };
-
-    //캘린더 팝업 닫기
-    const handleCalendarClose = (data) => {
-      if (data == "NO") {
-        showCalendarModel.value = false;
-        return;
-      }
-
-      CategoryList.value = [];
-
-      for (let i = 0; i < store.CalendarRePost.length; i++) {
-        for (let j = 0; j < posts.value.length; j++) {
-          const calendarDate =
-            store.CalendarRePost[i].toLocaleDateString("ko-KR");
-          const categoryDate = posts.value[j].writeDate;
-
-          // 날짜 비교 (year, month, day 각각 비교)
-          if (calendarDate == categoryDate) {
-            CategoryList.value.push(posts.value[j]);
-          }
-        }
-      }
-
-      showCalendarModel.value = false; // 모달 닫기
-    };
-
-    //네이버 지도
-    const handleMapClose = () => {
-      showMapModal.value = false;
-    };
-
-    //카테고리
-    const selectOptionBut = (option) => {
-      if (!posts.value.length) {
-        alert("게시된 게시글이 없습니다.");
-        return;
-      }
-      //기존 데이터 초기화
-      CategoryList.value = [];
-      selCategoryBut.value = option.optionId;
-      //카테고리 별 배열 추가
-      if (option.optionId == "1") {
-        CategoryList.value = posts.value;
-      } else {
-        CategoryList.value = CategoryList.value.concat(
-          posts.value.filter((post) => post.optionId === option.optionId)
-        );
-      }
-    };
-
-    //검색기능(반응형 데이터 감시 기능)
-    watch(searchKeyword, (newKeyword) => {
-      CategoryList.value = posts.value.filter((post) =>
-        post.title.includes(newKeyword)
-      );
-    });
-
-    //네이버 로그인 버튼
-    const naverLoginBtn = () => {
-      const loginUrl = `http://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
-      window.location.href = loginUrl; // 네이버 로그인 페이지로 이동
-    };
-
-    // 상세페이지 이동
-    const boardIndexPage = (post) => {
-      console.log(post);
-      emit("login", post);
-      router.push(`/board/${post}`);
-    };
-
-    // 뉴스 페이지
-    const NewPage = () => {
-      router.push({ path: "/newsPage" });
-    };
-
-    //캘린더
-    const CalendarBtn = () => {
-      showCalendarModel.value = true;
-    };
-
-    //네이버 지도
-    const naverMapBtn = () => {
-      // router.push({ path: "/naverMap" });
-      showMapModal.value = true;
-    };
-
-    // 초기 게시물 로딩
-    onMounted(() => {
-      CategoryList.value = posts.value;
-      selCategoryBut.value = selectOption.value[0].optionId;
-    });
-
-    return {
-      posts,
-      selectOption,
-      CategoryList,
-      searchKeyword,
-      searchYn,
-      showLoginModal,
-      showBoardWriModal,
-      naverLoginBtn,
-      handleLoginClose,
-      handleBoardWriClose,
-      showCalendarModel,
-      selCategoryBut,
-      naverMapBtn,
-      NewPage,
-      CalendarList,
-      showMapModal,
-      handleMapClose,
-      CalendarBtn,
-      handleCalendarClose,
-      boardIndexPage,
-      deleteCheckedPosts,
-      boardListWrite,
-      selectOptionBut,
-    };
-  },
+//게시물 작성
+const boardListWrite = () => {
+  showBoardWriModal.value = true;
 };
+
+// 선택된 게시물 삭제
+const deleteCheckedPosts = () => {
+  console.log(store.posts);
+  CategoryList.value = CategoryList.value.filter((post) => !post.checked);
+};
+
+//로그인 팝업 닫기
+const handleLoginClose = (data) => {
+  if (data) {
+    LoginDataForm.value = data;
+  }
+  showLoginModal.value = false; // 모달 닫기
+};
+
+//게시글 작성 팝업 닫기
+const handleBoardWriClose = () => {
+  console.log("handleBoardWriClose");
+  showBoardWriModal.value = false; // 모달 닫기
+};
+
+//캘린더 팝업 닫기
+const handleCalendarClose = (data) => {
+  if (data == "NO") {
+    showCalendarModel.value = false;
+    return;
+  }
+
+  CategoryList.value = [];
+
+  for (let i = 0; i < store.CalendarRePost.length; i++) {
+    for (let j = 0; j < posts.value.length; j++) {
+      const calendarDate = store.CalendarRePost[i].toLocaleDateString("ko-KR");
+      const categoryDate = posts.value[j].writeDate;
+
+      // 날짜 비교 (year, month, day 각각 비교)
+      if (calendarDate == categoryDate) {
+        CategoryList.value.push(posts.value[j]);
+      }
+    }
+  }
+
+  showCalendarModel.value = false; // 모달 닫기
+};
+
+//네이버 지도
+const handleMapClose = () => {
+  showMapModal.value = false;
+};
+
+//카테고리
+const selectOptionBut = (option) => {
+  if (!posts.value.length) {
+    alert("게시된 게시글이 없습니다.");
+    return;
+  }
+  //기존 데이터 초기화
+  CategoryList.value = [];
+  selCategoryBut.value = option.optionId;
+  //카테고리 별 배열 추가
+  if (option.optionId == "1") {
+    CategoryList.value = posts.value;
+  } else {
+    CategoryList.value = CategoryList.value.concat(
+      posts.value.filter((post) => post.optionId === option.optionId)
+    );
+  }
+};
+
+//검색기능(반응형 데이터 감시 기능)
+watch(searchKeyword, (newKeyword) => {
+  CategoryList.value = posts.value.filter((post) =>
+    post.title.includes(newKeyword)
+  );
+});
+
+//네이버 로그인 버튼
+const naverLoginBtn = () => {
+  const loginUrl = `http://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
+  window.location.href = loginUrl; // 네이버 로그인 페이지로 이동
+};
+
+// 상세페이지 이동
+const boardIndexPage = (post) => {
+  console.log(post);
+  emit("login", post);
+  router.push(`/board/${post}`);
+};
+
+// 뉴스 페이지
+const NewPage = () => {
+  router.push({ path: "/newsPage" });
+};
+
+//캘린더
+const CalendarBtn = () => {
+  showCalendarModel.value = true;
+};
+
+//네이버 지도
+const naverMapBtn = () => {
+  // router.push({ path: "/naverMap" });
+  showMapModal.value = true;
+};
+
+// 초기 게시물 로딩
+onMounted(() => {
+  CategoryList.value = posts.value;
+  selCategoryBut.value = selectOption.value[0].optionId;
+});
 </script>
 
 <style scoped>

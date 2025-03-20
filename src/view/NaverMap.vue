@@ -55,11 +55,81 @@
   </div>
 </template>
 
-<script>
+<script setup>
 /* eslint-disable no-undef */
 import { NaverMap, NaverMarker, NaverInfoWindow } from "vue3-naver-maps";
 import { ref, onMounted, computed } from "vue";
-import axios from "axios";
+
+const emit = defineEmits(["close"]);
+// 기본 마커 및 정보사항
+const markerPosition = ref([]);
+const markerRefs = ref([]);
+const infoWindowOpen = ref([]);
+
+const sidebarOpen = ref(false); // 사이드바 열림/닫힘 상태
+const activeMode = ref("all"); // 현재 선택된 모드
+
+// 지도 옵션 설정
+const mapOptions = computed(() => ({
+  position: (37.3595704, 127.105399),
+  zoom: 15,
+  zoomControl: false,
+  zoomControlOptions: { position: "TOP_RIGHT" },
+}));
+
+/* ------------------------------------ */
+//마커 로드
+const onLoadMarker = (event, index) => {
+  markerRefs.value[index] = event;
+  infoWindowOpen.value[index] = true;
+};
+
+const toggleInfoWindow = (index) => {
+  infoWindowOpen.value[index] = !infoWindowOpen.value[index];
+};
+
+//마커 정보창
+const onLoadInfoWindow = (event, index) => {
+  console.log(markerRefs.value[index]);
+  //infoWindowOpen.value[index] = false;
+};
+
+// // 지도 클릭 시 마커 위치 변경
+const onMapClick = (event) => {
+  markerPosition.value.push(event);
+  console.log(markerPosition.value);
+};
+
+// 모드 변경
+const setMode = (mode) => {
+  activeMode.value = mode;
+
+  if (mode === "myLocation") {
+    navigator.geolocation.getCurrentPosition((pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      markerPosition.value.push({ lat, lng, type: "default" });
+    });
+  }
+};
+
+// 사이드바 열고 닫기
+const toggleSidebar = () => {
+  sidebarOpen.value = !sidebarOpen.value;
+};
+
+onMounted(() => {
+  console.log(markerPosition.value);
+});
+
+const NaverMapClose = () => {
+  emit("close");
+};
+</script>
+<!-- <script>
+/* eslint-disable no-undef */
+import { NaverMap, NaverMarker, NaverInfoWindow } from "vue3-naver-maps";
+import { ref, onMounted, computed } from "vue";
 
 export default {
   name: "NaverMapComponent",
@@ -127,32 +197,8 @@ export default {
       sidebarOpen.value = !sidebarOpen.value;
     };
 
-    const bookTest = () => {
-      const URL =
-        "/v1/search/movie.json?query=%EC%A3%BC%EC%8B%9D&display=10&start=1&genre=1"; /*URL*/
-      const clientId = "nPQvqYv2ZtubwhQzisDn";
-      const clientSecret = "lVR8yLXry2";
-
-      axios
-        .get(URL, {
-          headers: {
-            Accept: "application/json",
-            "X-Naver-Client-Id": clientId,
-            "X-Naver-Client-Secret": clientSecret,
-          },
-        })
-        .then((response) => {
-          // 실제 API를 요청한다/
-          console.log(response.data);
-          let test = [];
-          test = test.concat(response.data.items); // 받아온 데이터를 movieList 배열에 넣어준다.
-          this.movieList = this.movieList.concat(test);
-        });
-    };
-
     onMounted(() => {
       console.log(markerPosition.value);
-      bookTest();
     });
 
     const NaverMapClose = () => {
@@ -184,7 +230,7 @@ export default {
     };
   },
 };
-</script>
+</script> -->
 
 <style>
 .modal-overlay {
