@@ -33,34 +33,22 @@
         @click="onMapClick($event)"
       >
         <naver-marker
-          v-for="marker in markerPosition"
-          :key="marker"
-          :latitude="marker.lat"
-          :longitude="marker.lng"
-          @load="onMarkerLoaded"
-          @click="onMarkerClicked"
+          v-for="(marker, index) in markerPosition"
+          :key="index"
+          :latitude="markerPosition[index].latlng._lat"
+          :longitude="markerPosition[index].latlng._lng"
+          @onLoad="onLoadMarker($event, index)"
+          @click="toggleInfoWindow(index)"
         >
         </naver-marker>
         <naver-info-window
-          v-if="isInfoWindowOpen"
-          :latitude="markerPosition[0].lat"
-          :longitude="markerPosition[0].lng"
-          :max-width="140"
-          :border-width="5"
-          :border-color="'#2db400'"
-          :background-color="'#eee'"
-          :anchor-size="anchorSize"
-          :anchor-skew="true"
-          :anchor-color="'#eee'"
+          v-for="(marker, index) in markerPosition"
+          :key="index"
+          :marker="markerRefs[index]"
+          :open="infoWindowOpen[index]"
+          @onLoad="onLoadInfoWindow($event, index)"
         >
-          <div class="info-window">
-            <div style="font-weight: bold; margin-bottom: 5px">
-              {{ mapOptions.FNAME }}
-            </div>
-            <div style="font-size: 13px">
-              {{ mapOptions.ANAME }}
-            </div>
-          </div>
+          <div class="infowindow-style">click Marker!😎</div>
         </naver-info-window>
       </naver-map>
     </div>
@@ -69,20 +57,24 @@
 
 <script>
 /* eslint-disable no-undef */
-import { NaverMap, NaverMarker } from "vue3-naver-maps";
+import { NaverMap, NaverMarker, NaverInfoWindow } from "vue3-naver-maps";
 import { ref, onMounted, computed } from "vue";
+import axios from "axios";
 
 export default {
   name: "NaverMapComponent",
   components: {
     NaverMap,
     NaverMarker,
+    NaverInfoWindow,
   },
   emits: ["close"],
   setup(_, { emit }) {
-    // 기본 마커
+    // 기본 마커 및 정보사항
     const markerPosition = ref([]);
-    const isInfoWindowOpen = ref(false);
+    const markerRefs = ref([]);
+    const infoWindowOpen = ref([]);
+
     const sidebarOpen = ref(false); // 사이드바 열림/닫힘 상태
     const activeMode = ref("all"); // 현재 선택된 모드
 
@@ -90,29 +82,31 @@ export default {
     const mapOptions = computed(() => ({
       position: (37.3595704, 127.105399),
       zoom: 15,
-      FNAME: "화장실 이름",
-      ANAME: "화장실 위치",
+      zoomControl: false,
+      zoomControlOptions: { position: "TOP_RIGHT" },
     }));
 
+    /* ------------------------------------ */
     //마커 로드
-    const onMarkerLoaded = (vue) => {
-      console.log("onMarkerLoaded==========>", vue);
+    const onLoadMarker = (event, index) => {
+      markerRefs.value[index] = event;
+      infoWindowOpen.value[index] = true;
     };
 
-    //마커 이벤트 핸들링
-    const onMarkerClicked = (event) => {
-      console.log("onMarkerClicked==========>", event);
-      isInfoWindowOpen.value = !isInfoWindowOpen.value;
+    const toggleInfoWindow = (index) => {
+      infoWindowOpen.value[index] = !infoWindowOpen.value[index];
     };
 
-    // 지도 클릭 시 마커 위치 변경
+    //마커 정보창
+    const onLoadInfoWindow = (event, index) => {
+      console.log(markerRefs.value[index]);
+      //infoWindowOpen.value[index] = false;
+    };
+
+    // // 지도 클릭 시 마커 위치 변경
     const onMapClick = (event) => {
-      if (event.latlng) {
-        markerPosition.value.push({
-          lat: event.latlng._lat,
-          lng: event.latlng._lng,
-        });
-      }
+      markerPosition.value.push(event);
+      console.log(markerPosition.value);
     };
 
     // 모드 변경
@@ -133,29 +127,60 @@ export default {
       sidebarOpen.value = !sidebarOpen.value;
     };
 
-    onMounted(() => {
-      markerPosition.value = [];
-    });
+    const bookTest = () => {
+      const URL =
+        "/v1/search/movie.json?query=%EC%A3%BC%EC%8B%9D&display=10&start=1&genre=1"; /*URL*/
+      const clientId = "nPQvqYv2ZtubwhQzisDn";
+      const clientSecret = "lVR8yLXry2";
 
-    const anchorSize = ref({ width: 30, height: 30 });
+      axios
+        .get(URL, {
+          headers: {
+            Accept: "application/json",
+            "X-Naver-Client-Id": clientId,
+            "X-Naver-Client-Secret": clientSecret,
+          },
+        })
+        .then((response) => {
+          // 실제 API를 요청한다/
+          console.log(response.data);
+          let test = [];
+          test = test.concat(response.data.items); // 받아온 데이터를 movieList 배열에 넣어준다.
+          this.movieList = this.movieList.concat(test);
+        });
+    };
+
+    onMounted(() => {
+      console.log(markerPosition.value);
+      bookTest();
+    });
 
     const NaverMapClose = () => {
       emit("close");
     };
 
+    // watch(
+    //   markerRefs,
+    //   (newVal) => {
+    //     console.log("markerRefs  변경됨:", newVal);
+    //   },
+    //   { deep: true }
+    // );
+
     return {
       markerPosition,
       mapOptions,
-      isInfoWindowOpen,
+      infoWindowOpen,
       sidebarOpen,
       activeMode,
       setMode,
       toggleSidebar,
       onMapClick,
       NaverMapClose,
-      onMarkerLoaded,
-      onMarkerClicked,
-      anchorSize,
+      onLoadMarker,
+      onLoadInfoWindow,
+      markerRefs,
+      toggleInfoWindow,
     };
   },
 };
@@ -234,7 +259,11 @@ export default {
 }
 
 .info_window {
-  padding: 10px;
-  font-size: 14px;
+  color: black;
+  background-color: white;
+  text-align: center;
+  font-weight: 600;
+  font-size: 20px;
+  padding: 6px 8px;
 }
 </style>
