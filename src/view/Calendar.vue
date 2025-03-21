@@ -1,10 +1,20 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="modal-overlay" @click.self="close">
+  <div
+    class="modal-overlay"
+    @click.self="close"
+  >
     <div class="modal-content">
-      <div class="header">캘린더</div>
+      <div class="header">
+        캘린더
+      </div>
       <div class="calendar">
         <div class="week-days">
-          <div v-for="day in weekDays" :key="day" class="day-name">
+          <div
+            v-for="day in weekDays"
+            :key="day"
+            class="day-name"
+          >
             {{ day }}
           </div>
         </div>
@@ -13,7 +23,7 @@
             v-for="n in startDay"
             :key="'empty-' + n"
             class="day empty"
-          ></div>
+          />
           <div
             v-for="day in daysInMonth"
             :key="day"
@@ -26,96 +36,82 @@
         </div>
       </div>
       <div>
-        <button @click="BoardBtn">게시글 이동하기</button>
-        <button @click="closePopup">취소</button>
+        <button @click="BoardBtn">
+          게시글 이동하기
+        </button>
+        <button @click="closePopup">
+          취소
+        </button>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import { computed, onMounted } from "vue";
+<script setup>
+/* eslint-disable no-undef */
+import { onMounted } from "vue";
 import { usePostStore } from "@/js/postStore";
 
-export default {
-  name: "CalendarPage",
-  emits: ["login"],
-  setup(_, { emit }) {
-    const today = new Date();
-    const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth();
-    const posts = computed(() => store.CalendarRePost);
+const today = new Date();
+const currentYear = today.getFullYear();
+const currentMonth = today.getMonth();
+// const posts = computed(() => store.CalendarRePost);
+const emit = defineEmits(["close"]);
+const store = usePostStore();
+// 선택된 날짜를 배열로 관리
+const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
 
-    const store = usePostStore();
-    // 선택된 날짜를 배열로 관리
-    const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
+// 현재 월의 총 일수
+const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+// 현재 월의 시작 요일
+const startDay = new Date(currentYear, currentMonth, 1).getDay();
 
-    // 현재 월의 총 일수
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-    // 현재 월의 시작 요일
-    const startDay = new Date(currentYear, currentMonth, 1).getDay();
+// 날짜 선택/해제
+const selectDate = (day) => {
+  const date = new Date(currentYear, currentMonth, day);
+  if (store.CalendarRePost.length === 0) {
+    store.CalendarRePost.push(date);
+  } else if (store.CalendarRePost.length === 1) {
+    const firstDate = store.CalendarRePost[0];
+    const secondDate = date;
 
-    // 날짜 선택/해제
-    const selectDate = (day) => {
-      const date = new Date(currentYear, currentMonth, day);
-      if (store.CalendarRePost.length === 0) {
-        store.CalendarRePost.push(date);
-      } else if (store.CalendarRePost.length === 1) {
-        const firstDate = store.CalendarRePost[0];
-        const secondDate = date;
+    // 날짜 순서 정렬
+    const start = firstDate < secondDate ? firstDate : secondDate;
+    const end = firstDate < secondDate ? secondDate : firstDate;
 
-        // 날짜 순서 정렬
-        const start = firstDate < secondDate ? firstDate : secondDate;
-        const end = firstDate < secondDate ? secondDate : firstDate;
-
-        store.CalendarRePost = [];
-        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-          store.CalendarRePost.push(new Date(d));
-        }
-      } else {
-        store.CalendarRePost = [date];
-      }
-    };
-
-    // 선택된 날짜 확인
-    const isSelected = (day) => {
-      return store.CalendarRePost.some(
-        (d) =>
-          d.getDate() === day &&
-          d.getMonth() === currentMonth &&
-          d.getFullYear() === currentYear
-      );
-    };
-
-    //게시글로 이동
-    const BoardBtn = () => {
-      console.log(
-        store.CalendarRePost.map((m) => m.toLocaleDateString("ko-KR"))
-      );
-      emit("close", "YES");
-    };
-
-    //팝업 종료
-    const closePopup = () => {
-      emit("close", "NO");
-    };
-
-    onMounted(() => {
-      console.log("진입");
-    });
-
-    return {
-      weekDays,
-      daysInMonth,
-      startDay,
-      posts,
-      closePopup,
-      BoardBtn,
-      selectDate,
-      isSelected,
-    };
-  },
+    store.CalendarRePost = [];
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      store.CalendarRePost.push(new Date(d));
+    }
+  } else {
+    store.CalendarRePost = [date];
+  }
 };
+
+// 선택된 날짜 확인
+const isSelected = (day) => {
+  return store.CalendarRePost.some(
+    (d) =>
+      d.getDate() === day &&
+      d.getMonth() === currentMonth &&
+      d.getFullYear() === currentYear
+  );
+};
+
+//게시글로 이동
+const BoardBtn = () => {
+  console.log(store.CalendarRePost.map((m) => m.toLocaleDateString("ko-KR")));
+  emit("close", "YES");
+};
+
+//팝업 종료
+const closePopup = () => {
+  emit("close", "NO");
+};
+
+onMounted(() => {
+  console.log("진입");
+});
 </script>
 
 <style scoped>

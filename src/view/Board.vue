@@ -3,10 +3,10 @@
   <div class="board-container">
     <h2>게시판</h2>
     <div class="button-group">
-      <button @click="CalendarBtn" class="action-btn">캘린더 보기</button>
-      <button @click="NewPage" class="action-btn">뉴스 페이지 이동</button>
-      <button @click="naverLoginBtn" class="action-btn">네이버 로그인</button>
-      <button @click="naverMapBtn" class="action-btn">네이버 지도</button>
+      <button class="action-btn" @click="CalendarBtn">캘린더 보기</button>
+      <button class="action-btn" @click="NewPage">뉴스 페이지 이동</button>
+      <button class="action-btn" @click="naverLoginBtn">네이버 로그인</button>
+      <button class="action-btn" @click="naverMapBtn">네이버 지도</button>
       <NaverMap v-if="showMapModal" @close="handleMapClose" />
     </div>
 
@@ -23,17 +23,17 @@
         <button
           v-for="option in selectOption"
           :key="option.optionId"
-          @click="selectOptionBut(option)"
           class="option-btn"
           :class="{ selected: selCategoryBut === option.optionId }"
+          @click="selectOptionBut(option)"
         >
           {{ option.optionText }}
         </button>
       </div>
     </div>
     <div class="write-actions">
-      <button @click="boardListWrite" class="primary-btn">게시글 작성</button>
-      <button @click="deleteCheckedPosts" class="danger-btn">선택 삭제</button>
+      <button class="primary-btn" @click="boardListWrite">게시글 작성</button>
+      <button class="danger-btn" @click="deleteCheckedPosts">선택 삭제</button>
     </div>
 
     <LoginPopup v-if="showLoginModal" :user="user" @close="handleLoginClose" />
@@ -48,7 +48,7 @@
       >
         <h3>{{ Category.title }}</h3>
         <p>{{ Category.content }}</p>
-        <input type="checkbox" v-model="Category.checked" @click.stop />
+        <input v-model="Category.checked" type="checkbox" @click.stop />
       </div>
     </transition-group>
   </div>
@@ -174,8 +174,9 @@ watch(searchKeyword, (newKeyword) => {
 
 //네이버 로그인 버튼
 const naverLoginBtn = () => {
-  const loginUrl = `http://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
-  window.location.href = loginUrl; // 네이버 로그인 페이지로 이동
+  // const loginUrl = `http://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
+  // window.location.href = loginUrl; // 네이버 로그인 페이지로 이동
+  router.push({ path: "/home" });
 };
 
 // 상세페이지 이동

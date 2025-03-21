@@ -4,12 +4,20 @@
       <h2>게시글 수정</h2>
 
       <form @submit.prevent="updatePost">
-        <select v-model="selected" required>
-          <option disabled value="">{{ editedPost.optionText }}</option>
+        <select
+          v-model="selected"
+          required
+        >
+          <option
+            disabled
+            value=""
+          >
+            {{ editedPost.optionText }}
+          </option>
           <option
             v-for="option in selectOption.slice(1)"
-            :value="option"
             :key="option"
+            :value="option"
           >
             {{ option.optionText }}
           </option>
@@ -20,74 +28,75 @@
           type="text"
           placeholder="제목을 입력하세요"
           required
-        />
+        >
         <textarea
           v-model="editedPost.content"
           placeholder="내용을 입력하세요"
-        ></textarea>
+        />
 
         <div>
-          <button type="submit">저장</button>
-          <router-link to="/" class="cancel-button">취소</router-link>
+          <button type="submit">
+            저장
+          </button>
+          <router-link
+            to="/"
+            class="cancel-button"
+          >
+            취소
+          </router-link>
         </div>
       </form>
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
+/* eslint-disable no-undef */
 import { usePostStore } from "@/js/postStore";
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 
-export default {
-  name: "EditPage",
-  props: ["user"],
-  setup(props) {
-    const router = useRouter();
-    const editedPost = ref("");
-    const selected = ref("");
-    const selectOption = computed(() => store.CommunityOption);
+const router = useRouter();
+const editedPost = ref("");
+const selected = ref("");
+const selectOption = computed(() => store.CommunityOption);
 
-    const store = usePostStore();
+const store = usePostStore();
 
-    // 오늘 날짜 생성
-    const today = new Date().toLocaleDateString("ko-KR");
+// 오늘 날짜 생성
+const today = new Date().toLocaleDateString("ko-KR");
 
-    onMounted(() => {
-      //  props를 통해 데이터가 넘어왔을 경우
-      if (props.user) {
-        editedPost.value = { ...props.user };
-      } //  데이터가 없을 경우 기본값 설정
-      else {
-        editedPost.value = { title: "제목 없음", content: "내용이 없습니다." };
-        router.push({ path: "/" });
-      }
-      console.log("editPasy", editedPost.value);
-      console.log("editPasy", selected.value);
-    });
+onMounted(() => {
+  //  props를 통해 데이터가 넘어왔을 경우
+  if (props.user) {
+    editedPost.value = { ...props.user };
+  } //  데이터가 없을 경우 기본값 설정
+  else {
+    editedPost.value = { title: "제목 없음", content: "내용이 없습니다." };
+    router.push({ path: "/" });
+  }
+  console.log("editPasy", editedPost.value);
+  console.log("editPasy", selected.value);
+});
 
-    const updatePost = () => {
-      for (var i = 0; i < selectOption.value.length; i++) {
-        if (selectOption.value[i].optionId != selected.value.optionId) {
-          editedPost.value.optionId = selected.value.optionId;
-          editedPost.value.optionText = selected.value.optionText;
-        }
-      }
-      editedPost.value.writeDate = today; // 날짜 저장
+const updatePost = () => {
+  for (var i = 0; i < selectOption.value.length; i++) {
+    if (selectOption.value[i].optionId != selected.value.optionId) {
+      editedPost.value.optionId = selected.value.optionId;
+      editedPost.value.optionText = selected.value.optionText;
+    }
+  }
+  editedPost.value.writeDate = today; // 날짜 저장
 
-      console.log("Updated Post:", editedPost.value);
+  console.log("Updated Post:", editedPost.value);
 
-      for (let i = 0; i < store.posts.length; i++) {
-        if (editedPost.value.id === store.posts[i].id) {
-          store.posts[i] = { ...editedPost.value };
-        }
-      }
+  for (let i = 0; i < store.posts.length; i++) {
+    if (editedPost.value.id === store.posts[i].id) {
+      store.posts[i] = { ...editedPost.value };
+    }
+  }
 
-      router.push("/"); // 수정 완료 후 메인 페이지로 이동
-    };
-    return { editedPost, selected, selectOption, updatePost };
-  },
+  router.push("/"); // 수정 완료 후 메인 페이지로 이동
 };
 </script>
 

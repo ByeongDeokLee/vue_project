@@ -1,6 +1,9 @@
 <template>
   <div>
-    <router-view :user="user" @login="handleLogin" />
+    <router-view
+      :user="user"
+      @login="handleLogin"
+    />
   </div>
 </template>
 

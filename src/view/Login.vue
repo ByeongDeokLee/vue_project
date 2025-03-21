@@ -1,43 +1,90 @@
 <template>
   <div class="login-container">
     <template>
-      <div id="map">맵</div>
+      <div id="map">
+        맵
+      </div>
     </template>
     <!-- 로그인 폼 -->
 
     <!-- <div id="naver_id_login"></div> -->
     <transition name="false">
-      <form class="login-form" v-if="!isLoggedIn" @submit.prevent="handleLogin">
-        <div class="Calendar-btn" @click="CalendarBtn"></div>
-        <h2 class="title">로그인</h2>
+      <form
+        v-if="!isLoggedIn"
+        class="login-form"
+        @submit.prevent="handleLogin"
+      >
+        <div
+          class="Calendar-btn"
+          @click="CalendarBtn"
+        />
+        <h2 class="title">
+          로그인
+        </h2>
         <input
           v-model="formDate.email"
           type="email"
           placeholder="이메일"
           required
-          @input="validateForm"
           class="input-field"
-        />
-        <p v-if="errors.email" class="error">{{ errors.email }}</p>
+          @input="validateForm"
+        >
+        <p
+          v-if="errors.email"
+          class="error"
+        >
+          {{ errors.email }}
+        </p>
         <input
           v-model="formDate.pwd"
           type="password"
           placeholder="비밀번호"
           required
-          @input="validateForm"
           class="input-field"
-        />
-        <p v-if="errors.pwd" class="error">{{ errors.pwd }}</p>
-        <button type="submit" class="login-button">로그인</button>
-        <button class="login-button" @click="NewPage">뉴스페이지 이동</button>
-        <button class="login-button" @click="naverLoginBtn">
+          @input="validateForm"
+        >
+        <p
+          v-if="errors.pwd"
+          class="error"
+        >
+          {{ errors.pwd }}
+        </p>
+        <button
+          type="submit"
+          class="login-button"
+        >
+          로그인
+        </button>
+        <button
+          class="login-button"
+          @click="NewPage"
+        >
+          뉴스페이지 이동
+        </button>
+        <button
+          class="login-button"
+          @click="naverLoginBtn"
+        >
           네이버 로그인
         </button>
-        <button class="login-button" @click="naverMapBtn">네이버 지도</button>
-        <p @click="MemberJoinBtn">회원가입</p>
+        <button
+          class="login-button"
+          @click="naverMapBtn"
+        >
+          네이버 지도
+        </button>
+        <p @click="MemberJoinBtn">
+          회원가입
+        </p>
       </form>
     </transition>
-    <button v-if="isLoggedIn" @click="logout" class="logout">로그아웃</button>
+    <button
+      v-if="isLoggedIn"
+      class="logout"
+      @click="logout"
+    >
+      로그아웃
+    </button>
   </div>
 </template>
 

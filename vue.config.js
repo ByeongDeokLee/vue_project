@@ -1,15 +1,17 @@
 const { defineConfig } = require("@vue/cli-service");
 module.exports = {
   transpileDependencies: true,
+  lintOnSave: false, // ESLint 검사 비활성화 (문제 해결 후 다시 true로 설정 가능)
   configureWebpack: {
     devtool: "source-map",
   },
   devServer: {
-    port: 8080,
     proxy: {
-      "/v1": {
-        target: "https://openapi.naver.com/",
+      "/naver-api": {
+        target: "https://openapi.naver.com",
         changeOrigin: true,
+        pathRewrite: { "^/naver-api": "" },
+        secure: false,
       },
     },
   },

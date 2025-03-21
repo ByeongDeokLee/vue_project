@@ -1,9 +1,15 @@
 <template>
   <div>
     <h2>Naver Login Callback</h2>
-    <p v-if="email">Email: {{ email }}</p>
-    <p v-if="nickname">Nickname: {{ nickname }}</p>
-    <button @click="logout">로그아웃</button>
+    <p v-if="email">
+      Email: {{ email }}
+    </p>
+    <p v-if="nickname">
+      Nickname: {{ nickname }}
+    </p>
+    <button @click="logout">
+      로그아웃
+    </button>
   </div>
 </template>
 

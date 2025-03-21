@@ -5,24 +5,42 @@
         <h1>네이버 지도</h1>
         <img
           src="@/assets/img/close.webp"
-          @click="NaverMapClose"
           class="naver_close"
-        />
+          @click="NaverMapClose"
+        >
       </div>
 
       <!-- 🟢 사이드바 -->
-      <div class="sidebar" :class="{ open: sidebarOpen }">
-        <button class="close-btn" @click="toggleSidebar">닫기</button>
+      <div
+        class="sidebar"
+        :class="{ open: sidebarOpen }"
+      >
+        <button
+          class="close-btn"
+          @click="toggleSidebar"
+        >
+          닫기
+        </button>
         <h2>지도 설정</h2>
         <ul>
-          <li @click="setMode('all')">📌 전체 보기</li>
-          <li @click="setMode('myLocation')">📍 내 위치</li>
-          <li @click="setMode('favorites')">⭐ 즐겨찾기</li>
+          <li @click="setMode('all')">
+            📌 전체 보기
+          </li>
+          <li @click="setMode('myLocation')">
+            📍 내 위치
+          </li>
+          <li @click="setMode('favorites')">
+            ⭐ 즐겨찾기
+          </li>
         </ul>
       </div>
 
       <!-- 🟢 사이드바 열기 버튼 -->
-      <button class="open-btn" v-if="!sidebarOpen" @click="toggleSidebar">
+      <button
+        v-if="!sidebarOpen"
+        class="open-btn"
+        @click="toggleSidebar"
+      >
         ☰
       </button>
 
@@ -39,8 +57,7 @@
           :longitude="markerPosition[index].latlng._lng"
           @onLoad="onLoadMarker($event, index)"
           @click="toggleInfoWindow(index)"
-        >
-        </naver-marker>
+        />
         <naver-info-window
           v-for="(marker, index) in markerPosition"
           :key="index"
@@ -48,7 +65,9 @@
           :open="infoWindowOpen[index]"
           @onLoad="onLoadInfoWindow($event, index)"
         >
-          <div class="infowindow-style">click Marker!😎</div>
+          <div class="infowindow-style">
+            click Marker!😎
+          </div>
         </naver-info-window>
       </naver-map>
     </div>
@@ -126,111 +145,6 @@ const NaverMapClose = () => {
   emit("close");
 };
 </script>
-<!-- <script>
-/* eslint-disable no-undef */
-import { NaverMap, NaverMarker, NaverInfoWindow } from "vue3-naver-maps";
-import { ref, onMounted, computed } from "vue";
-
-export default {
-  name: "NaverMapComponent",
-  components: {
-    NaverMap,
-    NaverMarker,
-    NaverInfoWindow,
-  },
-  emits: ["close"],
-  setup(_, { emit }) {
-    // 기본 마커 및 정보사항
-    const markerPosition = ref([]);
-    const markerRefs = ref([]);
-    const infoWindowOpen = ref([]);
-
-    const sidebarOpen = ref(false); // 사이드바 열림/닫힘 상태
-    const activeMode = ref("all"); // 현재 선택된 모드
-
-    // 지도 옵션 설정
-    const mapOptions = computed(() => ({
-      position: (37.3595704, 127.105399),
-      zoom: 15,
-      zoomControl: false,
-      zoomControlOptions: { position: "TOP_RIGHT" },
-    }));
-
-    /* ------------------------------------ */
-    //마커 로드
-    const onLoadMarker = (event, index) => {
-      markerRefs.value[index] = event;
-      infoWindowOpen.value[index] = true;
-    };
-
-    const toggleInfoWindow = (index) => {
-      infoWindowOpen.value[index] = !infoWindowOpen.value[index];
-    };
-
-    //마커 정보창
-    const onLoadInfoWindow = (event, index) => {
-      console.log(markerRefs.value[index]);
-      //infoWindowOpen.value[index] = false;
-    };
-
-    // // 지도 클릭 시 마커 위치 변경
-    const onMapClick = (event) => {
-      markerPosition.value.push(event);
-      console.log(markerPosition.value);
-    };
-
-    // 모드 변경
-    const setMode = (mode) => {
-      activeMode.value = mode;
-
-      if (mode === "myLocation") {
-        navigator.geolocation.getCurrentPosition((pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          markerPosition.value.push({ lat, lng, type: "default" });
-        });
-      }
-    };
-
-    // 사이드바 열고 닫기
-    const toggleSidebar = () => {
-      sidebarOpen.value = !sidebarOpen.value;
-    };
-
-    onMounted(() => {
-      console.log(markerPosition.value);
-    });
-
-    const NaverMapClose = () => {
-      emit("close");
-    };
-
-    // watch(
-    //   markerRefs,
-    //   (newVal) => {
-    //     console.log("markerRefs  변경됨:", newVal);
-    //   },
-    //   { deep: true }
-    // );
-
-    return {
-      markerPosition,
-      mapOptions,
-      infoWindowOpen,
-      sidebarOpen,
-      activeMode,
-      setMode,
-      toggleSidebar,
-      onMapClick,
-      NaverMapClose,
-      onLoadMarker,
-      onLoadInfoWindow,
-      markerRefs,
-      toggleInfoWindow,
-    };
-  },
-};
-</script> -->
 
 <style>
 .modal-overlay {

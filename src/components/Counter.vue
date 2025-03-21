@@ -1,7 +1,9 @@
 <template>
   <div>
     <h1>카운트 : {{ count }}</h1>
-    <button @click="increaseCount">+1 증가</button>
+    <button @click="increaseCount">
+      +1 증가
+    </button>
   </div>
 </template>
 

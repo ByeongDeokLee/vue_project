@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 //import Login from "../view/Login.vue";
+import Home from "../view/Home.vue";
 import Board from "../view/Board.vue";
 import DetailPage from "../view/DetailPage.vue";
 import EditPage from "../view/EditPage.vue";
@@ -11,7 +12,7 @@ import Calendar from "../view/Calendar.vue";
 import MemberJoin from "../view/memberJoin.vue";
 
 const routes = [
-  // { path: "/", component: Login },
+  { path: "/home", component: Home },
   {
     path: "/",
     component: Board,

@@ -1,119 +1,141 @@
 <template>
   <teleport to="body">
-    <div class="modal-overlay" @click.self="closeModal">
+    <div
+      class="modal-overlay"
+      @click.self="closeModal"
+    >
       <div class="modal-content">
-        <form @submit.prevent="addPost" class="post-form">
-          <select v-model="selected" required>
-            <option disabled value="">옵션을 선택하세요</option>
+        <form
+          class="post-form"
+          @submit.prevent="addPost"
+        >
+          <select
+            v-model="selected"
+            required
+          >
+            <option
+              disabled
+              value=""
+            >
+              옵션을 선택하세요
+            </option>
             <option
               v-for="option in selectOption.slice(1)"
-              :value="option"
               :key="option"
+              :value="option"
             >
               {{ option.optionText }}
             </option>
           </select>
 
-          <input v-model="newTitle" type="text" placeholder="제목" required />
+          <input
+            v-model="newTitle"
+            type="text"
+            placeholder="제목"
+            required
+          >
 
           <textarea
             v-model="newContent"
             placeholder="게시글을 작성하세요"
-          ></textarea>
+          />
 
           <!-- 작성 날짜 표시 -->
-          <input type="text" :value="today" readonly />
+          <input
+            type="text"
+            :value="today"
+            readonly
+          >
 
           <!-- 이미지 업로드 -->
-          <input type="file" @change="handleImageUpload" accept="image/*" />
+          <input
+            type="file"
+            accept="image/*"
+            @change="handleImageUpload"
+          >
 
           <!-- 이미지 미리보기 -->
           <div v-if="imagePreview">
             <p>이미지 미리보기:</p>
-            <img :src="imagePreview" alt="미리보기" class="preview-img" />
+            <img
+              :src="imagePreview"
+              alt="미리보기"
+              class="preview-img"
+            >
           </div>
 
-          <button type="submit">작성</button>
-          <button type="button" @click="closeModal">닫기</button>
+          <button type="submit">
+            작성
+          </button>
+          <button
+            type="button"
+            @click="closeModal"
+          >
+            닫기
+          </button>
         </form>
       </div>
     </div>
   </teleport>
 </template>
 
-<script>
+<script setup>
+/* eslint-disable no-undef */
 import { usePostStore } from "@/js/postStore";
 import { ref, computed } from "vue";
 
-export default {
-  name: "BoardWriteModal",
-  emits: ["close"],
-  setup(_, { emit }) {
-    const store = usePostStore();
-    const newTitle = ref("");
-    const newContent = ref("");
-    const selected = ref("");
-    const selectOption = computed(() => store.CommunityOption);
-    const posts = computed(() => store.posts);
-    const imageFile = ref(null);
-    const imagePreview = ref("");
+const store = usePostStore();
+const newTitle = ref("");
+const newContent = ref("");
+const selected = ref("");
+const selectOption = computed(() => store.CommunityOption);
+const posts = computed(() => store.posts);
+const imageFile = ref(null);
+const imagePreview = ref("");
+const emit = defineEmits(["close"]);
 
-    // 오늘 날짜 생성
-    const today = new Date().toLocaleDateString("ko-KR");
+// 오늘 날짜 생성
+const today = new Date().toLocaleDateString("ko-KR");
 
-    const addPost = () => {
-      // if (!newTitle.value || !newContent.value || !imageFile.value) {
-      //   alert("제목, 내용, 이미지를 모두 입력하세요.");
-      //   return;
-      // }
+const addPost = () => {
+  // if (!newTitle.value || !newContent.value || !imageFile.value) {
+  //   alert("제목, 내용, 이미지를 모두 입력하세요.");
+  //   return;
+  // }
 
-      if (!selected.value) {
-        alert("옵션을 선택하세요");
-        return;
-      }
+  if (!selected.value) {
+    alert("옵션을 선택하세요");
+    return;
+  }
 
-      const newPost = {
-        id: posts.value.length + 1,
-        title: newTitle.value,
-        content: newContent.value,
-        checked: false,
-        optionText: selected.value.optionText,
-        optionId: selected.value.optionId,
-        writeDate: today, // 작성 날짜 저장
-      };
+  const newPost = {
+    id: posts.value.length + 1,
+    title: newTitle.value,
+    content: newContent.value,
+    checked: false,
+    optionText: selected.value.optionText,
+    optionId: selected.value.optionId,
+    writeDate: today, // 작성 날짜 저장
+  };
 
-      store.posts.push(newPost);
+  store.posts.push(newPost);
 
-      emit("close"); // 모달 닫기
-    };
+  emit("close"); // 모달 닫기
+};
 
-    const closeModal = () => {
-      emit("close");
-    };
+const closeModal = () => {
+  emit("close");
+};
 
-    // 이미지 업로드 핸들러
-    const handleImageUpload = (event) => {
-      const file = event.target.files[0];
-      if (file && file.type.startsWith("image/")) {
-        imageFile.value = file;
-        imagePreview.value = URL.createObjectURL(file); // 로컬 이미지 미리보기
-      } else {
-        alert("이미지 파일만 업로드 가능합니다.");
-      }
-    };
-
-    return {
-      newTitle,
-      newContent,
-      selected,
-      selectOption,
-      today,
-      imagePreview,
-      handleImageUpload,
-      addPost,
-      closeModal,
-    };
-  },
+// 이미지 업로드 핸들러
+const handleImageUpload = (event) => {
+  const file = event.target.files[0];
+  if (file && file.type.startsWith("image/")) {
+    imageFile.value = file;
+    imagePreview.value = URL.createObjectURL(file); // 로컬 이미지 미리보기
+  } else {
+    alert("이미지 파일만 업로드 가능합니다.");
+  }
 };
 </script>
 
