@@ -206,7 +206,20 @@ const naverMapBtn = () => {
 onMounted(() => {
   CategoryList.value = posts.value;
   selCategoryBut.value = selectOption.value[0].optionId;
+  TestMap();
 });
+
+const TestMap = () => {
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      console.log("위도:", position.coords.latitude);
+      console.log("경도:", position.coords.longitude);
+    },
+    (error) => {
+      console.error("위치 정보를 가져올 수 없습니다:", error);
+    }
+  );
+};
 </script>
 
 <style scoped>

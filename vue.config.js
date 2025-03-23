@@ -12,6 +12,7 @@ module.exports = {
         changeOrigin: true,
         pathRewrite: { "^/naver-api": "" },
         secure: false,
+        logLevel: "debug", // 로그 활성화
       },
     },
   },
