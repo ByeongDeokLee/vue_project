@@ -15,9 +15,9 @@ module.exports = {
         pathRewrite: { "^/naver-api": "" },
         secure: false,
         logLevel: "debug", // 프록시 디버깅 활성화
-        headers: {
-          Connection: "keep-alive", // 안정적인 연결 유지
-        },
+        // headers: {
+        //   Connection: "keep-alive", // 안정적인 연결 유지
+        // },
       },
     },
   },
