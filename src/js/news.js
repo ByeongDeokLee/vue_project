@@ -25,7 +25,7 @@ export const searchDate = async (query) => {
     // const API_PWD = "lVR8yLXry2"; // 네이버 API에서 발급받은 API 키
     console.log("\n\n  여기 들어옴? \n\n\n", query);
 
-    const response = await axios.get(`/v1/search/local.json`, {
+    const response = await axios.get(`/naver-api/v1/search/local.json`, {
       params: {
         q: query,
         display: 5,
