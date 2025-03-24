@@ -21,10 +21,11 @@ export const fetchNews = async (query = "technology") => {
 
 export const searchDate = async (query) => {
   try {
-    const API_ID = "nPQvqYv2ZtubwhQzisDn"; // 네이버 API에서 발급받은 API 키
-    const API_PWD = "lVR8yLXry2"; // 네이버 API에서 발급받은 API 키
-    console.log("\n\n  여기 들어옴? \n\n\n");
-    const response = await axios.get(`/naver-api/v1/search/local.json`, {
+    // // const API_ID = ""; // 네이버 API에서 발급받은 API 키
+    // const API_PWD = "lVR8yLXry2"; // 네이버 API에서 발급받은 API 키
+    console.log("\n\n  여기 들어옴? \n\n\n", query);
+
+    const response = await axios.get(`/v1/search/local.json`, {
       params: {
         q: query,
         display: 5,
@@ -32,15 +33,31 @@ export const searchDate = async (query) => {
         sort: "random",
       },
       headers: {
-        "X-Naver-Client-Id": API_ID, // 네이버 API 클라이언트 ID
-        "X-Naver-Client-Secret": API_PWD, // 네이버 API 클라이언트 시크릿
-        Accept: "application/json", // JSON 응답을 원함
+        "X-Naver-Client-Id": "nPQvqYv2ZtubwhQzisDn", // 네이버 API 클라이언트 ID
+        "X-Naver-Client-Secret": "lVR8yLXry2", // 네이버 API 클라이언트 시크릿
+        // Accept: "application/json", // JSON 응답을 원함
       },
     });
 
     console.log("응답 ---> ", response);
     console.log("응답 ---> ", response.data);
     return response.data;
+    // let query = "서울";
+    // const URL =
+    //   "/naver-api/v1/search/local.json?query=" +
+    //   query +
+    //   "&display=5&start=1&sort=random"; /*URL*/
+    // let config = {
+    //   Headers: {
+    //     "X-Naver-Client-Id":"nPQvqYv2ZtubwhQzisDn",
+    //     "X-Naver-Client-Secret":"lVR8yLXry2",
+    //   },
+    // };
+
+    // axios.get(URL, "", config).then((response) => {
+    //   // 실제 API를 요청한다/
+    //   console.log(response);
+    // });
   } catch (error) {
     console.error("Error searchDate:", error);
     return [];
