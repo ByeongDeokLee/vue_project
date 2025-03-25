@@ -27,7 +27,7 @@ export const searchDate = async (query) => {
 
     const response = await axios.get(`/naver-api/v1/search/local.json`, {
       params: {
-        q: query,
+        query: query,
         display: 5,
         start: 1,
         sort: "random",
@@ -40,24 +40,8 @@ export const searchDate = async (query) => {
     });
 
     console.log("응답 ---> ", response);
-    console.log("응답 ---> ", response.data);
-    return response.data;
-    // let query = "서울";
-    // const URL =
-    //   "/naver-api/v1/search/local.json?query=" +
-    //   query +
-    //   "&display=5&start=1&sort=random"; /*URL*/
-    // let config = {
-    //   Headers: {
-    //     "X-Naver-Client-Id":"nPQvqYv2ZtubwhQzisDn",
-    //     "X-Naver-Client-Secret":"lVR8yLXry2",
-    //   },
-    // };
-
-    // axios.get(URL, "", config).then((response) => {
-    //   // 실제 API를 요청한다/
-    //   console.log(response);
-    // });
+    console.log("응답 ---> ", response.data.items);
+    return response.data.items;
   } catch (error) {
     console.error("Error searchDate:", error);
     return [];

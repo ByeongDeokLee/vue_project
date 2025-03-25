@@ -1,60 +1,50 @@
 <template>
   <div class="modal-overlay">
     <div class="modal-content">
-      <div>
+      <header class="modal-header">
         <h1>네이버 지도</h1>
         <img
           src="@/assets/img/close.webp"
-          class="naver_close"
-          @click="NaverMapClose"
-        >
-      </div>
-
-      <!-- 🟢 사이드바 -->
-      <div
-        class="sidebar"
-        :class="{ open: sidebarOpen }"
-      >
-        <button
           class="close-btn"
-          @click="toggleSidebar"
-        >
-          닫기
-        </button>
+          @click="NaverMapClose"
+        />
+      </header>
+
+      <!--  사이드바 -->
+      <aside class="sidebar" :class="{ open: sidebarOpen }">
+        <button class="close-sidebar-btn" @click="toggleSidebar">닫기</button>
         <h2>지도 설정</h2>
         <ul>
-          <li @click="setMode('all')">
-            📌 전체 보기
-          </li>
-          <li @click="setMode('myLocation')">
-            📍 내 위치
-          </li>
-          <li @click="setMode('favorites')">
-            ⭐ 즐겨찾기
-          </li>
+          <li @click="setMode('all')">전체 보기</li>
+          <li @click="setMode('myLocation')">내 위치</li>
+          <li @click="setMode('favorites')">즐겨찾기</li>
         </ul>
-      </div>
+      </aside>
 
-      <!-- 🟢 사이드바 열기 버튼 -->
+      <!--  사이드바 열기 버튼 (사이드바가 닫혀 있을 때만 표시) -->
       <button
-        v-if="!sidebarOpen"
-        class="open-btn"
+        class="open-sidebar-btn"
         @click="toggleSidebar"
+        v-if="!sidebarOpen"
       >
-        ☰
+        사이드 바 버튼
       </button>
 
       <!-- 네이버 지도 -->
       <naver-map
-        style="width: 400px; height: 400px"
+        class="map-container"
         :map-options="mapOptions"
         @click="onMapClick($event)"
       >
         <naver-marker
           v-for="(marker, index) in markerPosition"
           :key="index"
-          :latitude="markerPosition[index].latlng._lat"
-          :longitude="markerPosition[index].latlng._lng"
+          :latitude="
+            marker.type == 'default' ? marker._lat : marker.latlng._lat
+          "
+          :longitude="
+            marker.type == 'default' ? marker._lng : marker.latlng._lng
+          "
           @onLoad="onLoadMarker($event, index)"
           @click="toggleInfoWindow(index)"
         />
@@ -66,7 +56,10 @@
           @onLoad="onLoadInfoWindow($event, index)"
         >
           <div class="infowindow-style">
-            click Marker!😎
+            클릭한 위치
+            <button @click="favorites(index)">
+              {{ !favoriteName[index] ? "즐겨찾기 등록" : "즐겨찾기 해제" }}
+            </button>
           </div>
         </naver-info-window>
       </naver-map>
@@ -75,64 +68,84 @@
 </template>
 
 <script setup>
-/* eslint-disable no-undef */
 import { NaverMap, NaverMarker, NaverInfoWindow } from "vue3-naver-maps";
 import { ref, onMounted, computed } from "vue";
+import { usePostStore } from "@/js/postStore";
 
 const emit = defineEmits(["close"]);
-// 기본 마커 및 정보사항
+const store = usePostStore();
+
 const markerPosition = ref([]);
 const markerRefs = ref([]);
 const infoWindowOpen = ref([]);
+const favoriteList = computed(() => store.favoritesRePost);
+const favoriteName = ref([]);
 
-const sidebarOpen = ref(false); // 사이드바 열림/닫힘 상태
-const activeMode = ref("all"); // 현재 선택된 모드
+const sidebarOpen = ref(false);
+const activeMode = ref("all");
 
-// 지도 옵션 설정
 const mapOptions = computed(() => ({
-  position: (37.3595704, 127.105399),
+  position: { lat: 37.3595704, lng: 127.105399 },
   zoom: 15,
-  zoomControl: false,
+  zoomControl: true,
   zoomControlOptions: { position: "TOP_RIGHT" },
 }));
 
-/* ------------------------------------ */
-//마커 로드
 const onLoadMarker = (event, index) => {
   markerRefs.value[index] = event;
   infoWindowOpen.value[index] = true;
 };
 
 const toggleInfoWindow = (index) => {
+  console.log("toggleInfoWindow", index);
   infoWindowOpen.value[index] = !infoWindowOpen.value[index];
 };
 
-//마커 정보창
 const onLoadInfoWindow = (event, index) => {
-  console.log(markerRefs.value[index]);
-  //infoWindowOpen.value[index] = false;
+  console.log("onLoadInfoWindow11111111111111", index);
 };
 
-// // 지도 클릭 시 마커 위치 변경
 const onMapClick = (event) => {
   markerPosition.value.push(event);
   console.log(markerPosition.value);
 };
 
-// 모드 변경
 const setMode = (mode) => {
   activeMode.value = mode;
-
   if (mode === "myLocation") {
     navigator.geolocation.getCurrentPosition((pos) => {
-      const lat = pos.coords.latitude;
-      const lng = pos.coords.longitude;
-      markerPosition.value.push({ lat, lng, type: "default" });
+      const _lat = pos.coords.latitude;
+      const _lng = pos.coords.longitude;
+      markerPosition.value.push({ _lat, _lng, type: "default" });
     });
+  } else if (mode === "favorites") {
+    if (favoriteList.value.length < 0) {
+      return alert("즐겨찾기에 등록된 핀이 없습니다.");
+    } else {
+      markerPosition.value = [];
+      markerPosition.value = favoriteList.value;
+    }
   }
 };
 
-// 사이드바 열고 닫기
+const favorites = (index) => {
+  if (!favoriteName.value[index]) {
+    console.log("true 야");
+    favoriteList.value.push(markerPosition.value[index]);
+    favoriteName.value[idx].push(true);
+  } else {
+    favoriteName.value[idx].push(false);
+    // console.log("false 야");
+    // return alert("이미 즐겨찾기에 등록이 되어 있습니다.");
+  }
+  // for (var i = 0; i < favoriteList.value.length; i++) {
+  //   console.log("")
+  //   if (markerPosition.value[index].latlng === favoriteList.value[0].latlng) {
+  //     return alert("이미 즐겨찾기에 등록이 되어 있습니다.");
+  //   }
+  // }
+};
+
 const toggleSidebar = () => {
   sidebarOpen.value = !sidebarOpen.value;
 };
@@ -147,6 +160,7 @@ const NaverMapClose = () => {
 </script>
 
 <style>
+/* 모달 스타일 */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -162,41 +176,94 @@ const NaverMapClose = () => {
 .modal-content {
   background: #fff;
   padding: 20px;
-  border-radius: 8px;
-  width: 400px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  position: relative;
+  width: 900px;
+  max-width: 90%;
 }
 
-.map-container {
-  width: 100%;
-  height: 400px;
-}
-
-/* 사이드 바 */
-.open-btn {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  background: #0070f3;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  cursor: pointer;
-  font-size: 18px;
-  border-radius: 5px;
+/* 헤더 스타일 */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
 .close-btn {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
+/* 지도 스타일 */
+.map-container {
+  width: 100%;
+  height: 600px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 2; /* 🟢 지도는 사이드바보다 앞에 위치 */
+}
+
+/* 사이드바 스타일 */
+.sidebar {
+  position: absolute;
+  top: 0;
+  left: -300px;
+  width: 250px;
+  height: 700px;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  z-index: 1;
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.sidebar.open {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* 사이드바 닫기 버튼 */
+.close-sidebar-btn {
   width: 100%;
   padding: 10px;
-  background: red;
+  background: e0e0e0;
   color: white;
   border: none;
   cursor: pointer;
   margin-bottom: 10px;
 }
 
-/* 🟢 리스트 스타일 */
+/*  사이드바 열기 버튼 */
+.open-sidebar-btn {
+  background: #e0e0e0;
+  color: black;
+  border: none;
+  padding: 6px 12px;
+  /* font-size: 14px; */
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+  position: absolute;
+  top: 48px;
+  right: 50px;
+  height: 30px;
+  right: 60px;
+  width: 150px;
+}
+
+/* 마우스 호버 효과 */
+.open-sidebar-btn:hover {
+  background: #e0e0e0;
+}
+
+/* 리스트 스타일 */
 .sidebar ul {
   list-style: none;
   padding: 0;
@@ -206,24 +273,22 @@ const NaverMapClose = () => {
   padding: 10px;
   cursor: pointer;
   border-bottom: 1px solid #ddd;
+  transition: background 0.2s;
 }
 
 .sidebar ul li:hover {
   background: #f5f5f5;
 }
 
-.naver_close {
-  object-fit: contain;
-  width: 30px;
-  height: 30px;
-}
-
-.info_window {
+/* 인포윈도우 스타일 */
+.infowindow-style {
   color: black;
   background-color: white;
   text-align: center;
   font-weight: 600;
-  font-size: 20px;
+  font-size: 14px;
   padding: 6px 8px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 </style>

@@ -5,23 +5,11 @@ export const usePostStore = defineStore("postStore", () => {
   //게시판 배열
   const posts = ref([]);
 
-  // function getPostById(id) {
-  //   return posts.value.find((post) => post.id === id);
-  // }
-
   //댓글 배열
   const newRePost = ref([]);
 
-  // function getRePostById(id) {
-  //   return newRePost.value.find((newRePost) => newRePost.id === id);
-  // }
-
   //대댓글 배열
   const toggleRePost = ref({});
-
-  // function gettogglePostById(id) {
-  //   return toggleRePost.value.find((toggleRePost) => toggleRePost.id === id);
-  // }
 
   //카테고리 배열
   const CommunityOption = ref([
@@ -55,30 +43,18 @@ export const usePostStore = defineStore("postStore", () => {
     },
   ]);
 
-  // function getCommunityOptionById(id) {
-  //   return CommunityOption.value.find(
-  //     (CommunityOption) => CommunityOption.id === id
-  //   );
-  // }
-
   //날짜 배열
   const CalendarRePost = ref([]);
 
-  // function getCalendarRePostById(id) {
-  //   return CalendarRePost.value.find(
-  //     (CalendarRePost) => CalendarRePost.id === id
-  //   );
-  // }
+  //지도 즐겨찾기
+  const favoritesRePost = ref([]);
+
   return {
     posts,
     newRePost,
     toggleRePost,
     CommunityOption,
     CalendarRePost,
-    // getCalendarRePostById,
-    // getCommunityOptionById,
-    // gettogglePostById,
-    // getRePostById,
-    // getPostById,
+    favoritesRePost,
   };
 });
