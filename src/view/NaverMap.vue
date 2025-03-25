@@ -130,20 +130,12 @@ const setMode = (mode) => {
 
 const favorites = (index) => {
   if (!favoriteName.value[index]) {
-    console.log("true 야");
     favoriteList.value.push(markerPosition.value[index]);
-    favoriteName.value[idx].push(true);
+    favoriteName.value[index] = true;
   } else {
-    favoriteName.value[idx].push(false);
-    // console.log("false 야");
-    // return alert("이미 즐겨찾기에 등록이 되어 있습니다.");
+    favoriteName.value[index] = !favoriteName.value[index];
+    favoriteList.value.splice(index, 1);
   }
-  // for (var i = 0; i < favoriteList.value.length; i++) {
-  //   console.log("")
-  //   if (markerPosition.value[index].latlng === favoriteList.value[0].latlng) {
-  //     return alert("이미 즐겨찾기에 등록이 되어 있습니다.");
-  //   }
-  // }
 };
 
 const toggleSidebar = () => {
