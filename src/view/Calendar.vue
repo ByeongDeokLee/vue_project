@@ -1,29 +1,16 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div
-    class="modal-overlay"
-    @click.self="close"
-  >
+  <div class="modal-overlay" @click.self="close">
     <div class="modal-content">
-      <div class="header">
-        캘린더
-      </div>
+      <div class="header">캘린더</div>
       <div class="calendar">
         <div class="week-days">
-          <div
-            v-for="day in weekDays"
-            :key="day"
-            class="day-name"
-          >
+          <div v-for="day in weekDays" :key="day" class="day-name">
             {{ day }}
           </div>
         </div>
         <div class="days">
-          <div
-            v-for="n in startDay"
-            :key="'empty-' + n"
-            class="day empty"
-          />
+          <div v-for="n in startDay" :key="'empty-' + n" class="day empty" />
           <div
             v-for="day in daysInMonth"
             :key="day"
@@ -36,12 +23,8 @@
         </div>
       </div>
       <div>
-        <button @click="BoardBtn">
-          게시글 이동하기
-        </button>
-        <button @click="closePopup">
-          취소
-        </button>
+        <button @click="BoardBtn">게시글 이동하기</button>
+        <button @click="closePopup">취소</button>
       </div>
     </div>
   </div>
@@ -69,9 +52,18 @@ const startDay = new Date(currentYear, currentMonth, 1).getDay();
 // 날짜 선택/해제
 const selectDate = (day) => {
   const date = new Date(currentYear, currentMonth, day);
+
+  console.log("\n\n\n g확인 \n\n\n", store.CalendarRePost.length);
   if (store.CalendarRePost.length === 0) {
     store.CalendarRePost.push(date);
   } else if (store.CalendarRePost.length === 1) {
+    if (
+      store.CalendarRePost[0].toLocaleDateString("ko-KR") ===
+      date.toLocaleDateString("ko-KR")
+    ) {
+      store.CalendarRePost = [];
+      return;
+    }
     const firstDate = store.CalendarRePost[0];
     const secondDate = date;
 

@@ -1,7 +1,5 @@
-// src/api/news.js
-
 import axios from "axios";
-import { reject, resolve } from "core-js/fn/promise";
+// import { reject, resolve } from "core-js/fn/promise";
 
 export const fetchNews = async (query = "technology") => {
   try {
