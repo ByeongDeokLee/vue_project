@@ -3,6 +3,21 @@
     <div class="modal-content">
       <header class="modal-header">
         <h1>네이버 지도</h1>
+        <div v-if="formSearch">
+          <input type="text" v-model="query" />
+          <button @click="searchDateBtn" class="search-but">검색</button>
+        </div>
+        <!--  사이드바 열기 버튼 (사이드바가 닫혀 있을 때만 표시) -->
+        <div v-else>
+          <button
+            class="open-sidebar-btn"
+            @click="toggleSidebar"
+            v-if="!sidebarOpen"
+          >
+            사이드 바 버튼
+          </button>
+        </div>
+        <button @click="testFuntoin">테스트 용</button>
         <img
           src="@/assets/img/close.webp"
           class="close-btn"
@@ -18,17 +33,9 @@
           <li @click="setMode('all')">전체 보기</li>
           <li @click="setMode('myLocation')">내 위치</li>
           <li @click="setMode('favorites')">즐겨찾기</li>
+          <li @click="setMode('formSearch')">검색</li>
         </ul>
       </aside>
-
-      <!--  사이드바 열기 버튼 (사이드바가 닫혀 있을 때만 표시) -->
-      <button
-        class="open-sidebar-btn"
-        @click="toggleSidebar"
-        v-if="!sidebarOpen"
-      >
-        사이드 바 버튼
-      </button>
 
       <!-- 네이버 지도 -->
       <naver-map
@@ -71,6 +78,7 @@
 import { NaverMap, NaverMarker, NaverInfoWindow } from "vue3-naver-maps";
 import { ref, onMounted, computed } from "vue";
 import { usePostStore } from "@/js/postStore";
+import { searchDate } from "../js/news";
 
 const emit = defineEmits(["close"]);
 const store = usePostStore();
@@ -80,9 +88,14 @@ const markerRefs = ref([]);
 const infoWindowOpen = ref([]);
 const favoriteList = computed(() => store.favoritesRePost);
 const favoriteName = ref([]);
+const formSearch = ref(false);
+const searchDateRes = ref([]);
+const query = ref("");
 
 const sidebarOpen = ref(false);
 const activeMode = ref("all");
+
+const testList = ref([]);
 
 const mapOptions = computed(() => ({
   position: { lat: 37.3595704, lng: 127.105399 },
@@ -119,12 +132,14 @@ const setMode = (mode) => {
       markerPosition.value.push({ _lat, _lng, type: "default" });
     });
   } else if (mode === "favorites") {
-    if (favoriteList.value.length < 0) {
+    if (favoriteList.value.length < 1) {
       return alert("즐겨찾기에 등록된 핀이 없습니다.");
     } else {
       markerPosition.value = [];
       markerPosition.value = favoriteList.value;
     }
+  } else if (mode === "formSearch") {
+    formSearch.value = !formSearch.value;
   }
 };
 
@@ -136,6 +151,38 @@ const favorites = (index) => {
     favoriteName.value[index] = !favoriteName.value[index];
     favoriteList.value.splice(index, 1);
   }
+};
+
+const searchDateBtn = () => {
+  searchDateRes.value = searchDate(query.value)
+    .then(() => {
+      markerPosition.value = [];
+      for (var i = 0; i < searchDateRes.value.length; i++) {
+        const searchLat = searchDateRes.value[i].mapx;
+        const searchLng = searchDateRes.value[i].mapy;
+
+        const _lat = searchLat.slice(0, 2) + "." + searchLat.slice(2);
+        const _lng = searchLng.slice(0, 2) + "." + searchLng.slice(2);
+        markerPosition.value.push({ _lat, _lng, type: "default" });
+        console.log("\n\n\n check \n\n", markerPosition.value);
+      }
+    })
+    .catch((error) => {
+      console.log("error===> ", error);
+    });
+};
+
+const testFuntoin = () => {
+  for (var i = 0; i < searchDateRes.value.length; i++) {
+    const searchLat = searchDateRes.value[i].mapx;
+    const searchLng = searchDateRes.value[i].mapy;
+
+    const _lat = searchLat.slice(0, 2) + "." + searchLat.slice(2);
+    const _lng = searchLng.slice(0, 2) + "." + searchLng.slice(2);
+    testList.value.push({ _lat, _lng, type: "default" });
+  }
+
+  console.log("\n\n searchDateBtn \n\n\n", testList.value);
 };
 
 const toggleSidebar = () => {
@@ -196,7 +243,7 @@ const NaverMapClose = () => {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   position: relative;
-  z-index: 2; /* 🟢 지도는 사이드바보다 앞에 위치 */
+  z-index: 2; /*  지도는 사이드바보다 앞에 위치 */
 }
 
 /* 사이드바 스타일 */
@@ -282,5 +329,17 @@ const NaverMapClose = () => {
   padding: 6px 8px;
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+.search-but {
+  width: 75px;
+  height: 35px;
+}
+
+.input {
+  width: auto;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 </style>
