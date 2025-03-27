@@ -17,7 +17,7 @@
             사이드 바 버튼
           </button>
         </div>
-        <button @click="testFuntoin">테스트 용</button>
+        <!-- <button @click="testFuntoin">테스트 용</button> -->
         <img
           src="@/assets/img/close.webp"
           class="close-btn"
@@ -64,9 +64,10 @@
         >
           <div class="infowindow-style">
             클릭한 위치
-            <button @click="favorites(index)">
+            <button @click="favoritesPin(index)">
               {{ !favoriteName[index] ? "즐겨찾기 등록" : "즐겨찾기 해제" }}
             </button>
+            <button @click="favoritesDel(index)">핀 제거</button>
           </div>
         </naver-info-window>
       </naver-map>
@@ -132,6 +133,7 @@ const setMode = (mode) => {
       markerPosition.value.push({ _lat, _lng, type: "default" });
     });
   } else if (mode === "favorites") {
+    console.log("\n\n\n setMode000 \n\n\n", favoriteList.value);
     if (favoriteList.value.length < 1) {
       return alert("즐겨찾기에 등록된 핀이 없습니다.");
     } else {
@@ -143,7 +145,7 @@ const setMode = (mode) => {
   }
 };
 
-const favorites = (index) => {
+const favoritesPin = (index) => {
   if (!favoriteName.value[index]) {
     favoriteList.value.push(markerPosition.value[index]);
     favoriteName.value[index] = true;
@@ -153,37 +155,34 @@ const favorites = (index) => {
   }
 };
 
+const favoritesDel = (index) => {
+  console.log("제거에 들어왔다", index);
+  console.log("삭제 전 배열:", [...markerPosition.value]); // 배열 복사해서 로그 출력
+  // console.log("제거에 들어왔다", markerPosition.value[index]);
+  markerPosition.value.splice(index, 1);
+  // console.log("제거에 햇다", markerPosition.value[index]);
+};
+
 const searchDateBtn = () => {
-  searchDateRes.value = searchDate(query.value)
-    .then(() => {
-      markerPosition.value = [];
-      for (var i = 0; i < searchDateRes.value.length; i++) {
-        const searchLat = searchDateRes.value[i].mapx;
-        const searchLng = searchDateRes.value[i].mapy;
+  searchDate(query.value).then((res) => {
+    searchDateRes.value = res; // 응답을 저장
 
-        const _lat = searchLat.slice(0, 2) + "." + searchLat.slice(2);
-        const _lng = searchLng.slice(0, 2) + "." + searchLng.slice(2);
-        markerPosition.value.push({ _lat, _lng, type: "default" });
-        console.log("\n\n\n check \n\n", markerPosition.value);
-      }
-    })
-    .catch((error) => {
-      console.log("error===> ", error);
-    });
+    markerPosition.value = [];
+    for (var i = 0; i < res.length; i++) {
+      const searchLat = res[i].mapx;
+      const searchLng = res[i].mapy;
+
+      const _lat = Number(searchLng.slice(0, 2) + "." + searchLng.slice(2));
+      const _lng = Number(searchLat.slice(0, 3) + "." + searchLat.slice(3));
+
+      markerPosition.value.push({ _lat, _lng, type: "default" });
+    }
+  });
 };
 
-const testFuntoin = () => {
-  for (var i = 0; i < searchDateRes.value.length; i++) {
-    const searchLat = searchDateRes.value[i].mapx;
-    const searchLng = searchDateRes.value[i].mapy;
-
-    const _lat = searchLat.slice(0, 2) + "." + searchLat.slice(2);
-    const _lng = searchLng.slice(0, 2) + "." + searchLng.slice(2);
-    testList.value.push({ _lat, _lng, type: "default" });
-  }
-
-  console.log("\n\n searchDateBtn \n\n\n", testList.value);
-};
+// const testFuntoin = (event) => {
+//   console.log("들어왔어?");
+// };
 
 const toggleSidebar = () => {
   sidebarOpen.value = !sidebarOpen.value;
