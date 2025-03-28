@@ -3,17 +3,14 @@
     <div class="modal-content">
       <header class="modal-header">
         <h1>네이버 지도</h1>
-        <div v-if="formSearch">
-          <input type="text" v-model="query" />
-          <button @click="searchDateBtn" class="search-but">검색</button>
-        </div>
-        <!--  사이드바 열기 버튼 (사이드바가 닫혀 있을 때만 표시) -->
-        <div v-else>
-          <button
-            class="open-sidebar-btn"
-            @click="toggleSidebar"
-            v-if="!sidebarOpen"
-          >
+        <div class="search-container">
+          <div v-if="formSearch">
+            <input class="serach-input" type="text" v-model="query" />
+            <button @click="searchDateBtn" class="search-but">검색</button>
+            <button v-if="favoriteYn" @click="favoriteAll"></button>
+          </div>
+
+          <button class="open-sidebar-btn" @click="toggleSidebar" v-else>
             사이드 바 버튼
           </button>
         </div>
@@ -47,10 +44,10 @@
           v-for="(marker, index) in markerPosition"
           :key="index"
           :latitude="
-            marker.type == 'default' ? marker._lat : marker.latlng._lat
+            marker.type == 'default' ? marker._lat : marker.event.latlng._lat
           "
           :longitude="
-            marker.type == 'default' ? marker._lng : marker.latlng._lng
+            marker.type == 'default' ? marker._lng : marker.event.latlng._lng
           "
           @onLoad="onLoadMarker($event, index)"
           @click="toggleInfoWindow(index)"
@@ -89,6 +86,7 @@ const markerRefs = ref([]);
 const infoWindowOpen = ref([]);
 const favoriteList = computed(() => store.favoritesRePost);
 const favoriteName = ref([]);
+const favoriteYn = ref(false);
 const formSearch = ref(false);
 const searchDateRes = ref([]);
 const query = ref("");
@@ -96,7 +94,7 @@ const query = ref("");
 const sidebarOpen = ref(false);
 const activeMode = ref("all");
 
-const testList = ref([]);
+// const testList = ref([]);
 
 const mapOptions = computed(() => ({
   position: { lat: 37.3595704, lng: 127.105399 },
@@ -117,10 +115,14 @@ const toggleInfoWindow = (index) => {
 
 const onLoadInfoWindow = (event, index) => {
   console.log("onLoadInfoWindow11111111111111", index);
+  console.log("onLoadInfoWindow22222222222222", markerPosition.value);
 };
 
 const onMapClick = (event) => {
-  markerPosition.value.push(event);
+  markerPosition.value.push({
+    id: Date.now(), // 🔹 고유 ID 추가
+    event: event,
+  });
   console.log(markerPosition.value);
 };
 
@@ -133,7 +135,6 @@ const setMode = (mode) => {
       markerPosition.value.push({ _lat, _lng, type: "default" });
     });
   } else if (mode === "favorites") {
-    console.log("\n\n\n setMode000 \n\n\n", favoriteList.value);
     if (favoriteList.value.length < 1) {
       return alert("즐겨찾기에 등록된 핀이 없습니다.");
     } else {
@@ -143,24 +144,35 @@ const setMode = (mode) => {
   } else if (mode === "formSearch") {
     formSearch.value = !formSearch.value;
   }
+  console.log("확인", markerPosition.value);
 };
 
 const favoritesPin = (index) => {
+  console.log(
+    "\n\n\n\n favoritesPin 확인 \n\n\n\n",
+    !favoriteName.value[index]
+  );
   if (!favoriteName.value[index]) {
-    favoriteList.value.push(markerPosition.value[index]);
+    // 객체의 참조를 저장하는 것이 아니라, 새로운 객체를 생성하여 추가
+    favoriteList.value.push({ ...markerPosition.value[index] });
     favoriteName.value[index] = true;
   } else {
     favoriteName.value[index] = !favoriteName.value[index];
     favoriteList.value.splice(index, 1);
   }
+
+  console.log("즐겨찾기11111111", favoriteList.value);
+  console.log("즐겨찾기22222222", markerPosition.value);
 };
 
 const favoritesDel = (index) => {
-  console.log("제거에 들어왔다", index);
-  console.log("삭제 전 배열:", [...markerPosition.value]); // 배열 복사해서 로그 출력
-  // console.log("제거에 들어왔다", markerPosition.value[index]);
   markerPosition.value.splice(index, 1);
-  // console.log("제거에 햇다", markerPosition.value[index]);
+};
+
+const favoriteAll = () => {
+  console.log("확인 전", markerPosition.value);
+  store.favoritesRePost.value = markerPosition.value;
+  console.log("확인 후", store.favoritesRePost.value);
 };
 
 const searchDateBtn = () => {
@@ -176,6 +188,7 @@ const searchDateBtn = () => {
       const _lng = Number(searchLat.slice(0, 3) + "." + searchLat.slice(3));
 
       markerPosition.value.push({ _lat, _lng, type: "default" });
+      favoriteYn.value = !favoriteYn.value;
     }
   });
 };
@@ -334,11 +347,7 @@ const NaverMapClose = () => {
   height: 35px;
 }
 
-.input {
+.serach-input {
   width: auto;
-  padding: 8px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
 }
 </style>
