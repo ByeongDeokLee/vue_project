@@ -20,10 +20,6 @@ export const fetchNews = async (query = "technology") => {
 
 export const searchDate = async (query) => {
   try {
-    // // const API_ID = ""; // 네이버 API에서 발급받은 API 키
-    // const API_PWD = "lVR8yLXry2"; // 네이버 API에서 발급받은 API 키
-    console.log("\n\n  여기 들어옴? \n\n\n", query);
-
     const response = await axios.get(`/naver-api/v1/search/local.json`, {
       params: {
         query: query,
@@ -34,7 +30,7 @@ export const searchDate = async (query) => {
       headers: {
         "X-Naver-Client-Id": "nPQvqYv2ZtubwhQzisDn", // 네이버 API 클라이언트 ID
         "X-Naver-Client-Secret": "lVR8yLXry2", // 네이버 API 클라이언트 시크릿
-        // Accept: "application/json", // JSON 응답을 원함
+        Accept: "application/json", // JSON 응답을 원함
       },
     });
 
@@ -45,4 +41,19 @@ export const searchDate = async (query) => {
     console.error("Error searchDate:", error);
     return [];
   }
+};
+
+export const getUserInfoAPI = async (accessToken) => {
+  try {
+    console.log("안녕하세여", accessToken);
+    const response = await axios.get(`/naver-api/v1/nid/me`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`, // 네이버 API 클라이언트 ID
+        Accept: "application/json", // JSON 응답을 원함
+      },
+    });
+
+    console.log("\n\n\n 응답 \n\n\n", response.data);
+    return response.data;
+  } catch (error) {}
 };

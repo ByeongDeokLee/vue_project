@@ -5,7 +5,8 @@
     <div class="button-group">
       <button class="action-btn" @click="CalendarBtn">캘린더 보기</button>
       <button class="action-btn" @click="NewPage">뉴스 페이지 이동</button>
-      <button class="action-btn" @click="naverLoginBtn">네이버 로그인</button>
+      <div id="naver_id_login"></div>
+      <!-- <button class="action-btn" @click="naverLoginBtn">네이버 로그인</button> -->
       <button class="action-btn" @click="naverMapBtn">네이버 지도</button>
       <NaverMap v-if="showMapModal" @close="handleMapClose" />
     </div>
@@ -58,7 +59,7 @@
 /* eslint-disable no-undef */
 import { usePostStore } from "@/js/postStore";
 import { onMounted, computed, ref, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import LoginPopup from "@/view/LoginPopup.vue";
 import BoardWrite from "@/view/BoardWrite.vue";
 import Calendar from "@/view/Calendar.vue";
@@ -66,9 +67,8 @@ import NaverMap from "@/view/NaverMap.vue";
 
 // Naver 로그인 초기화
 const clientId = "nPQvqYv2ZtubwhQzisDn"; // 여기에 네이버 개발자 센터에서 발급받은 클라이언트 ID를 넣어야 합니다.
-const redirectUri = "http://localhost:8080/naverLogin"; // 인코딩 필수!
-// const redirectUri = encodeURIComponent("http://localhost:8080/naverLogin"); // 인코딩 필수!
-const state = Math.random().toString(36).substring(7);
+const callbackUrl = "http://localhost:8080/naverLogin"; // 인코딩 필수!
+// const state = Math.random().toString(36).substring(7);
 
 const emit = defineEmits(["close"]);
 
@@ -89,6 +89,10 @@ const showMapModal = ref(false);
 const LoginDataForm = ref({});
 
 // const CalendarList = computed(() => store.CalendarRePost);
+
+//네이버 로그인
+const naverLogin = ref(null);
+const route = useRoute();
 
 const store = usePostStore();
 
@@ -172,12 +176,12 @@ watch(searchKeyword, (newKeyword) => {
   );
 });
 
-//네이버 로그인 버튼
-const naverLoginBtn = () => {
-  // const loginUrl = `http://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
-  // window.location.href = loginUrl; // 네이버 로그인 페이지로 이동
-  router.push({ path: "/home" });
-};
+// //네이버 로그인 버튼
+// const naverLoginBtn = () => {
+//   const loginUrl = `http://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
+//   window.location.href = loginUrl; // 네이버 로그인 페이지로 이동
+//   router.push({ path: "/home" });
+// };
 
 // 상세페이지 이동
 const boardIndexPage = (post) => {
@@ -207,6 +211,26 @@ onMounted(() => {
   CategoryList.value = posts.value;
   selCategoryBut.value = selectOption.value[0].optionId;
   TestMap();
+
+  // 네이버 로그인 객체 생성
+  naverLogin.value = new window.naver_id_login(clientId, callbackUrl);
+
+  // CSRF 방지를 위한 상태값 설정
+  const state = naverLogin.value.getUniqState();
+  naverLogin.value.setState(state);
+
+  // 네이버 로그인 버튼 설정
+  naverLogin.value.setButton("white", 2, 40);
+  naverLogin.value.setDomain("http://localhost:8080");
+
+  // 네이버 로그인 초기화
+  naverLogin.value.init_naver_id_login();
+
+  // ✅ 네이버 로그인 후 콜백 URL에서 `access_token` 확인
+  if (route.query.access_token) {
+    accessToken.value = route.query.access_token;
+    console.log("네이버 액세스 토큰:", accessToken.value);
+  }
 });
 
 const TestMap = () => {
