@@ -76,7 +76,7 @@
 import { NaverMap, NaverMarker, NaverInfoWindow } from "vue3-naver-maps";
 import { ref, onMounted, computed } from "vue";
 import { usePostStore } from "@/js/postStore";
-import { searchDate } from "../js/news";
+import { searchDate } from "../js/actions";
 
 const emit = defineEmits(["close"]);
 const store = usePostStore();
@@ -148,10 +148,6 @@ const setMode = (mode) => {
 };
 
 const favoritesPin = (index) => {
-  console.log(
-    "\n\n\n\n favoritesPin 확인 \n\n\n\n",
-    !favoriteName.value[index]
-  );
   if (!favoriteName.value[index]) {
     // 객체의 참조를 저장하는 것이 아니라, 새로운 객체를 생성하여 추가
     favoriteList.value.push({ ...markerPosition.value[index] });
@@ -160,9 +156,6 @@ const favoritesPin = (index) => {
     favoriteName.value[index] = !favoriteName.value[index];
     favoriteList.value.splice(index, 1);
   }
-
-  console.log("즐겨찾기11111111", favoriteList.value);
-  console.log("즐겨찾기22222222", markerPosition.value);
 };
 
 const favoritesDel = (index) => {
@@ -170,9 +163,7 @@ const favoritesDel = (index) => {
 };
 
 const favoriteAll = () => {
-  console.log("확인 전", markerPosition.value);
   store.favoritesRePost.value = markerPosition.value;
-  console.log("확인 후", store.favoritesRePost.value);
 };
 
 const searchDateBtn = () => {

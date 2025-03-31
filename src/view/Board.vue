@@ -64,15 +64,18 @@ import LoginPopup from "@/view/LoginPopup.vue";
 import BoardWrite from "@/view/BoardWrite.vue";
 import Calendar from "@/view/Calendar.vue";
 import NaverMap from "@/view/NaverMap.vue";
+import { actions } from "../js/actions";
+import { getUserInfoAPI } from "../js/actions";
 
 // Naver 로그인 초기화
 const clientId = "nPQvqYv2ZtubwhQzisDn"; // 여기에 네이버 개발자 센터에서 발급받은 클라이언트 ID를 넣어야 합니다.
-const callbackUrl = "http://localhost:8080/naverLogin"; // 인코딩 필수!
-// const state = Math.random().toString(36).substring(7);
+const callbackUrl = "http://localhost:8080/"; // 인코딩 필수!
 
 const emit = defineEmits(["close"]);
-
+const route = useRoute();
+const store = usePostStore();
 const router = useRouter();
+
 const posts = computed(() => store.posts);
 const selectOption = computed(() => store.CommunityOption);
 const selCategoryBut = ref(null);
@@ -92,9 +95,6 @@ const LoginDataForm = ref({});
 
 //네이버 로그인
 const naverLogin = ref(null);
-const route = useRoute();
-
-const store = usePostStore();
 
 //게시물 작성
 const boardListWrite = () => {
@@ -176,13 +176,6 @@ watch(searchKeyword, (newKeyword) => {
   );
 });
 
-// //네이버 로그인 버튼
-// const naverLoginBtn = () => {
-//   const loginUrl = `http://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
-//   window.location.href = loginUrl; // 네이버 로그인 페이지로 이동
-//   router.push({ path: "/home" });
-// };
-
 // 상세페이지 이동
 const boardIndexPage = (post) => {
   console.log(post);
@@ -210,7 +203,7 @@ const naverMapBtn = () => {
 onMounted(() => {
   CategoryList.value = posts.value;
   selCategoryBut.value = selectOption.value[0].optionId;
-  TestMap();
+  // TestMap();
 
   // 네이버 로그인 객체 생성
   naverLogin.value = new window.naver_id_login(clientId, callbackUrl);
@@ -226,23 +219,39 @@ onMounted(() => {
   // 네이버 로그인 초기화
   naverLogin.value.init_naver_id_login();
 
-  // ✅ 네이버 로그인 후 콜백 URL에서 `access_token` 확인
-  if (route.query.access_token) {
-    accessToken.value = route.query.access_token;
-    console.log("네이버 액세스 토큰:", accessToken.value);
+  // console.log("\n\n 확인차111  \n\n", naverLogin.value);
+  // console.log("\n\n 확인차222  \n\n", new window.naver_id_login(clientId));
+  // console.log(
+  //   "\n\n 확인차222  \n\n",
+  //   naverLogin.value.oauthParams.access_token
+  // );
+  if (naverLogin.value.oauthParams) {
+    getUserInfo();
   }
 });
 
-const TestMap = () => {
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      console.log("위도:", position.coords.latitude);
-      console.log("경도:", position.coords.longitude);
-    },
-    (error) => {
-      console.error("위치 정보를 가져올 수 없습니다:", error);
-    }
-  );
+const testfun = () => {
+  console.log("안녕하세여");
+  const params = {
+    q: "technology", // 검색할 키워드
+    apiKey: "46162df5a3924a9da310086e1aa6c5c0",
+    pageSize: 5, // 불러올 기사 수 (최대 100개)
+  };
+  actions.fetchNews(params);
+};
+
+// 사용자 프로필 조회
+const getUserInfo = () => {
+  // actions.getUserInfoAPI(naverLogin.value.oauthParams.access_token);
+  try {
+    getUserInfoAPI(naverLogin.value.oauthParams.access_token).then((res) => {
+      console.log("사용자 프로필 조회", res);
+    });
+    // email.value = data.response.email;
+    // nickname.value = data.response.nickname;
+  } catch (error) {
+    console.error("Error fetching user info:", error);
+  }
 };
 </script>
 

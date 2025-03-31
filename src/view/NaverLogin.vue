@@ -10,7 +10,7 @@
 <script>
 import { onMounted, ref, watchEffect } from "vue";
 import { useRouter } from "vue-router";
-import { getUserInfoAPI } from "../js/news";
+import { getUserInfoAPI } from "../js/actions";
 
 const clientId = "nPQvqYv2ZtubwhQzisDn";
 // const redirectUri = "http://localhost:8080/naverlogin"; // 콜백URL

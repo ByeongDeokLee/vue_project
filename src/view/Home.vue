@@ -16,7 +16,7 @@
 
 <script setup>
 import { onMounted, ref } from "vue";
-import { searchDate } from "../js/news";
+import { searchDate } from "../js/actions";
 
 const news = ref([]); // 뉴스 리스트
 const query = ref("서울"); // 초기 검색 키워드
