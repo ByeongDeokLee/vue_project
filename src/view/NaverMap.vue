@@ -40,19 +40,67 @@
         :map-options="mapOptions"
         @click="onMapClick($event)"
       >
-        <naver-marker
-          v-for="(marker, index) in markerPosition"
-          :key="index"
-          :latitude="
-            marker.type == 'default' ? marker._lat : marker.event.latlng._lat
-          "
-          :longitude="
-            marker.type == 'default' ? marker._lng : marker.event.latlng._lng
-          "
-          @onLoad="onLoadMarker($event, index)"
-          @click="toggleInfoWindow(index)"
-        />
-        <naver-info-window
+        <div v-if="!favorMap">
+          <naver-marker
+            v-for="(marker, index) in markerPosition"
+            :key="index"
+            :latitude="
+              marker.type == 'default' ? marker._lat : marker.event.latlng._lat
+            "
+            :longitude="
+              marker.type == 'default' ? marker._lng : marker.event.latlng._lng
+            "
+            @onLoad="onLoadMarker($event, index)"
+            @click="toggleInfoWindow(index)"
+          />
+          <naver-info-window
+            v-for="(marker, index) in markerPosition"
+            :key="index"
+            :marker="markerRefs[index]"
+            :open="infoWindowOpen[index]"
+            @onLoad="onLoadInfoWindow($event, index)"
+          >
+            <div class="infowindow-style">
+              클릭한 위치
+              <button @click="favoritesPin(index)">
+                {{ !favoriteName[index] ? "즐겨찾기 등록" : "즐겨찾기 해제" }}
+              </button>
+              <button @click="favoritesDel(index)">핀 제거</button>
+            </div>
+          </naver-info-window>
+        </div>
+
+        <div v-else>
+          <naver-marker
+            v-for="(marker, index) in favoriteList"
+            :key="index"
+            :latitude="
+              marker.type == 'default' ? marker._lat : marker.event.latlng._lat
+            "
+            :longitude="
+              marker.type == 'default' ? marker._lng : marker.event.latlng._lng
+            "
+            @onLoad="onLoadMarker($event, index)"
+            @click="toggleInfoWindow(index)"
+          />
+          <naver-info-window
+            v-for="(marker, index) in favoriteList"
+            :key="index"
+            :marker="markerRefs[index]"
+            :open="infoWindowOpen[index]"
+            @onLoad="onLoadInfoWindow($event, index)"
+          >
+            <div class="infowindow-style">
+              클릭한 위치
+              <button @click="favoritesPin(index)">
+                {{ !favoriteName[index] ? "즐겨찾기 등록" : "즐겨찾기 해제" }}
+              </button>
+              <button @click="favoritesDel(index)">핀 제거</button>
+            </div>
+          </naver-info-window>
+        </div>
+
+        <!--         <naver-info-window
           v-for="(marker, index) in markerPosition"
           :key="index"
           :marker="markerRefs[index]"
@@ -66,7 +114,7 @@
             </button>
             <button @click="favoritesDel(index)">핀 제거</button>
           </div>
-        </naver-info-window>
+        </naver-info-window> -->
       </naver-map>
     </div>
   </div>
@@ -74,7 +122,7 @@
 
 <script setup>
 import { NaverMap, NaverMarker, NaverInfoWindow } from "vue3-naver-maps";
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { usePostStore } from "@/js/postStore";
 import { searchDate } from "../js/actions";
 
@@ -84,8 +132,13 @@ const store = usePostStore();
 const markerPosition = ref([]);
 const markerRefs = ref([]);
 const infoWindowOpen = ref([]);
+
 const favoriteList = computed(() => store.favoritesRePost);
+const favoriteRefs = ref([]);
 const favoriteName = ref([]);
+
+const favorMap = ref(false);
+
 const favoriteYn = ref(false);
 const formSearch = ref(false);
 const searchDateRes = ref([]);
@@ -104,6 +157,8 @@ const mapOptions = computed(() => ({
 }));
 
 const onLoadMarker = (event, index) => {
+  console.log("\n\n\n onLoadMarker11111 \n\n\n", index);
+  console.log("\n\n\n onLoadMarker22222 \n\n\n", event);
   markerRefs.value[index] = event;
   infoWindowOpen.value[index] = true;
 };
@@ -114,8 +169,8 @@ const toggleInfoWindow = (index) => {
 };
 
 const onLoadInfoWindow = (event, index) => {
-  console.log("onLoadInfoWindow11111111111111", index);
   console.log("onLoadInfoWindow22222222222222", markerPosition.value);
+  console.log("onLoadInfoWindow33333333333333", favoriteList.value);
 };
 
 const onMapClick = (event) => {
@@ -123,7 +178,6 @@ const onMapClick = (event) => {
     id: Date.now(), // 🔹 고유 ID 추가
     event: event,
   });
-  console.log(markerPosition.value);
 };
 
 const setMode = (mode) => {
@@ -139,27 +193,35 @@ const setMode = (mode) => {
       return alert("즐겨찾기에 등록된 핀이 없습니다.");
     } else {
       markerPosition.value = [];
-      markerPosition.value = favoriteList.value;
+      markerPosition.value = JSON.parse(JSON.stringify(favoriteList.value));
     }
   } else if (mode === "formSearch") {
     formSearch.value = !formSearch.value;
+  } else if (mode === "all") {
   }
-  console.log("확인", markerPosition.value);
 };
 
 const favoritesPin = (index) => {
   if (!favoriteName.value[index]) {
-    // 객체의 참조를 저장하는 것이 아니라, 새로운 객체를 생성하여 추가
-    favoriteList.value.push({ ...markerPosition.value[index] });
+    favoriteList.value.push(
+      JSON.parse(JSON.stringify(markerPosition.value[index]))
+    );
+    favoriteRefs.value.push(
+      JSON.parse(JSON.stringify(markerRefs.value[index]))
+    );
     favoriteName.value[index] = true;
   } else {
     favoriteName.value[index] = !favoriteName.value[index];
     favoriteList.value.splice(index, 1);
+    favoriteRefs.value.splice(index, 1);
   }
 };
 
 const favoritesDel = (index) => {
+  favoriteList.value.splice(index, 1);
   markerPosition.value.splice(index, 1);
+  markerRefs.value.splice(index, 1);
+  infoWindowOpen.value.splice(index, 1);
 };
 
 const favoriteAll = () => {
@@ -194,6 +256,14 @@ const toggleSidebar = () => {
 
 onMounted(() => {
   console.log(markerPosition.value);
+});
+
+watch(markerPosition, (newVal, oldVal) => {
+  console.log("반응형 데이터 감시 기능11", newVal);
+  console.log("반응형 데이터 감시 기능22", oldVal);
+  // if (oldVal.length > 1) {
+  //   markerPosition.value = favoriteList.value;
+  // }
 });
 
 const NaverMapClose = () => {
