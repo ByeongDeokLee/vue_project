@@ -29,7 +29,9 @@
         <ul>
           <li @click="setMode('all')">전체 보기</li>
           <li @click="setMode('myLocation')">내 위치</li>
-          <li @click="setMode('favorites')">즐겨찾기</li>
+          <li @click="setMode('favorites')">
+            {{ !favorMap ? "즐겨찾기" : "즐겨찾기 해제" }}
+          </li>
           <li @click="setMode('formSearch')">검색</li>
         </ul>
       </aside>
@@ -62,7 +64,7 @@
           >
             <div class="infowindow-style">
               클릭한 위치
-              <button @click="favoritesPin(index)">
+              <button @click="favoritesPin($event, index)">
                 {{ !favoriteName[index] ? "즐겨찾기 등록" : "즐겨찾기 해제" }}
               </button>
               <button @click="favoritesDel(index)">핀 제거</button>
@@ -92,7 +94,7 @@
           >
             <div class="infowindow-style">
               클릭한 위치
-              <button @click="favoritesPin(index)">
+              <button @click="favoritesPin($event, index)">
                 {{ !favoriteName[index] ? "즐겨찾기 등록" : "즐겨찾기 해제" }}
               </button>
               <button @click="favoritesDel(index)">핀 제거</button>
@@ -157,8 +159,6 @@ const mapOptions = computed(() => ({
 }));
 
 const onLoadMarker = (event, index) => {
-  console.log("\n\n\n onLoadMarker11111 \n\n\n", index);
-  console.log("\n\n\n onLoadMarker22222 \n\n\n", event);
   markerRefs.value[index] = event;
   infoWindowOpen.value[index] = true;
 };
@@ -169,8 +169,12 @@ const toggleInfoWindow = (index) => {
 };
 
 const onLoadInfoWindow = (event, index) => {
-  console.log("onLoadInfoWindow22222222222222", markerPosition.value);
-  console.log("onLoadInfoWindow33333333333333", favoriteList.value);
+  console.log("\n\n 정보 이벤트 \n\n\n", event);
+  if (!favoriteName[index]) {
+    console.log("등록한다");
+  } else {
+    console.log("안한다");
+  }
 };
 
 const onMapClick = (event) => {
@@ -192,8 +196,7 @@ const setMode = (mode) => {
     if (favoriteList.value.length < 1) {
       return alert("즐겨찾기에 등록된 핀이 없습니다.");
     } else {
-      markerPosition.value = [];
-      markerPosition.value = JSON.parse(JSON.stringify(favoriteList.value));
+      favorMap.value = !favorMap.value;
     }
   } else if (mode === "formSearch") {
     formSearch.value = !formSearch.value;
@@ -201,19 +204,22 @@ const setMode = (mode) => {
   }
 };
 
-const favoritesPin = (index) => {
+const favoritesPin = (event, index) => {
+  console.log("\n\n 핀 이벤트 \n\n\n", event);
+  console.log("\n\n 핀 이벤트 \n\n\n", index);
   if (!favoriteName.value[index]) {
     favoriteList.value.push(
       JSON.parse(JSON.stringify(markerPosition.value[index]))
     );
-    favoriteRefs.value.push(
-      JSON.parse(JSON.stringify(markerRefs.value[index]))
-    );
+
     favoriteName.value[index] = true;
   } else {
     favoriteName.value[index] = !favoriteName.value[index];
     favoriteList.value.splice(index, 1);
     favoriteRefs.value.splice(index, 1);
+    if (favoriteList.value.length == 0) {
+      favorMap.value = !favorMap.value;
+    }
   }
 };
 
@@ -245,10 +251,6 @@ const searchDateBtn = () => {
     }
   });
 };
-
-// const testFuntoin = (event) => {
-//   console.log("들어왔어?");
-// };
 
 const toggleSidebar = () => {
   sidebarOpen.value = !sidebarOpen.value;
