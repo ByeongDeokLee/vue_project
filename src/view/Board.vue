@@ -59,12 +59,13 @@
 /* eslint-disable no-undef */
 import { usePostStore } from "@/js/postStore";
 import { onMounted, computed, ref, watch } from "vue";
-import { useRouter, useRoute } from "vue-router";
+// import { useRouter, useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 import LoginPopup from "@/view/LoginPopup.vue";
 import BoardWrite from "@/view/BoardWrite.vue";
 import Calendar from "@/view/Calendar.vue";
 import NaverMap from "@/view/NaverMap.vue";
-import { actions } from "../js/actions";
+// import { actions } from "../js/actions";
 import { getUserInfoAPI } from "../js/actions";
 
 // Naver 로그인 초기화
@@ -72,7 +73,7 @@ const clientId = "nPQvqYv2ZtubwhQzisDn"; // 여기에 네이버 개발자 센터
 const callbackUrl = "http://localhost:8080/"; // 인코딩 필수!
 
 const emit = defineEmits(["close"]);
-const route = useRoute();
+// const route = useRoute();
 const store = usePostStore();
 const router = useRouter();
 
@@ -230,15 +231,15 @@ onMounted(() => {
   }
 });
 
-const testfun = () => {
-  console.log("안녕하세여");
-  const params = {
-    q: "technology", // 검색할 키워드
-    apiKey: "46162df5a3924a9da310086e1aa6c5c0",
-    pageSize: 5, // 불러올 기사 수 (최대 100개)
-  };
-  actions.fetchNews(params);
-};
+// const testfun = () => {
+//   console.log("안녕하세여");
+//   const params = {
+//     q: "technology", // 검색할 키워드
+//     apiKey: "46162df5a3924a9da310086e1aa6c5c0",
+//     pageSize: 5, // 불러올 기사 수 (최대 100개)
+//   };
+//   actions.fetchNews(params);
+// };
 
 // 사용자 프로필 조회
 const getUserInfo = () => {

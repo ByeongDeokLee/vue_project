@@ -7,7 +7,7 @@
           <div v-if="formSearch">
             <input class="serach-input" type="text" v-model="query" />
             <button @click="searchDateBtn" class="search-but">검색</button>
-            <button v-if="favoriteYn" @click="favoriteAll"></button>
+            <!-- <button v-if="favoriteYn" @click="favoriteAll"></button> -->
           </div>
 
           <button class="open-sidebar-btn" @click="toggleSidebar" v-else>
@@ -62,12 +62,27 @@
             :open="infoWindowOpen[index]"
             @onLoad="onLoadInfoWindow($event, index)"
           >
-            <div class="infowindow-style">
+            <div v-if="searchDateInfo" class="infowindow-style">
               클릭한 위치
               <button @click="favoritesPin($event, index)">
                 {{ !favoriteName[index] ? "즐겨찾기 등록" : "즐겨찾기 해제" }}
               </button>
               <button @click="favoritesDel(index)">핀 제거</button>
+            </div>
+            <div v-else class="infowindow-style">
+              <ul>
+                <li>{{ searchDateRes.title }}</li>
+                <li>{{ searchDateRes.address }}</li>
+                <li>
+                  <a :href="searchDateRes.link" target="_blank">{{
+                    searchDateRes.link
+                  }}</a>
+                </li>
+                <li @click="favoritesPin($event, index)">
+                  {{ !favoriteName[index] ? "즐겨찾기 등록" : "즐겨찾기 해제" }}
+                </li>
+                <li @click="favoritesDel(index)">핀 제거</li>
+              </ul>
             </div>
           </naver-info-window>
         </div>
@@ -101,22 +116,6 @@
             </div>
           </naver-info-window>
         </div>
-
-        <!--         <naver-info-window
-          v-for="(marker, index) in markerPosition"
-          :key="index"
-          :marker="markerRefs[index]"
-          :open="infoWindowOpen[index]"
-          @onLoad="onLoadInfoWindow($event, index)"
-        >
-          <div class="infowindow-style">
-            클릭한 위치
-            <button @click="favoritesPin(index)">
-              {{ !favoriteName[index] ? "즐겨찾기 등록" : "즐겨찾기 해제" }}
-            </button>
-            <button @click="favoritesDel(index)">핀 제거</button>
-          </div>
-        </naver-info-window> -->
       </naver-map>
     </div>
   </div>
@@ -143,6 +142,7 @@ const favorMap = ref(false);
 
 const favoriteYn = ref(false);
 const formSearch = ref(false);
+const searchDateInfo = ref(true);
 const searchDateRes = ref([]);
 const query = ref("");
 
@@ -169,7 +169,6 @@ const toggleInfoWindow = (index) => {
 };
 
 const onLoadInfoWindow = (event, index) => {
-  console.log("\n\n 정보 이벤트 \n\n\n", event);
   if (!favoriteName[index]) {
     console.log("등록한다");
   } else {
@@ -205,8 +204,6 @@ const setMode = (mode) => {
 };
 
 const favoritesPin = (event, index) => {
-  console.log("\n\n 핀 이벤트 \n\n\n", event);
-  console.log("\n\n 핀 이벤트 \n\n\n", index);
   if (!favoriteName.value[index]) {
     favoriteList.value.push(
       JSON.parse(JSON.stringify(markerPosition.value[index]))
@@ -236,19 +233,18 @@ const favoriteAll = () => {
 
 const searchDateBtn = () => {
   searchDate(query.value).then((res) => {
-    searchDateRes.value = res; // 응답을 저장
+    searchDateInfo.value = false;
+    searchDateRes.value = res[0]; // 응답을 저장
 
     markerPosition.value = [];
-    for (var i = 0; i < res.length; i++) {
-      const searchLat = res[i].mapx;
-      const searchLng = res[i].mapy;
+    const searchLat = res[0].mapx;
+    const searchLng = res[0].mapy;
 
-      const _lat = Number(searchLng.slice(0, 2) + "." + searchLng.slice(2));
-      const _lng = Number(searchLat.slice(0, 3) + "." + searchLat.slice(3));
+    const _lat = Number(searchLng.slice(0, 2) + "." + searchLng.slice(2));
+    const _lng = Number(searchLat.slice(0, 3) + "." + searchLat.slice(3));
 
-      markerPosition.value.push({ _lat, _lng, type: "default" });
-      favoriteYn.value = !favoriteYn.value;
-    }
+    markerPosition.value.push({ _lat, _lng, type: "default" });
+    favoriteYn.value = !favoriteYn.value;
   });
 };
 

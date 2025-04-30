@@ -75,7 +75,7 @@ export const searchDate = async (query) => {
     const response = await axios.get(`/naver-api/v1/search/local.json`, {
       params: {
         query: query,
-        display: 5,
+        display: 1,
         start: 1,
         sort: "random",
       },
@@ -107,5 +107,8 @@ export const getUserInfoAPI = async (accessToken) => {
 
     console.log("\n\n\n 응답 \n\n\n", response.data);
     return response.data;
-  } catch (error) {}
+  } catch (error) {
+    console.error("Error getUserInfoAPI:", error);
+    return [];
+  }
 };

@@ -17,5 +17,15 @@ module.exports = {
   ],
   rules: {
     "vue/multi-word-component-names": "off", // 'Board' 같은 단일 단어 컴포넌트 이름 허용
+    "vue/max-attributes-per-line": [
+      "error",
+      {
+        singleline: 5, // 한 줄에 최대 5개까지 허용
+        multiline: {
+          max: 1,
+          allowFirstLine: false,
+        },
+      },
+    ],
   },
 };
